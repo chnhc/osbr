@@ -1,0 +1,37 @@
+
+Java抽象语法树AST，JCTree 分析
+    https://blog.csdn.net/u013998373/article/details/90050810#JCVariableDecl_867
+
+JavaPoet使用详解
+    https://blog.csdn.net/IO_Field/article/details/89355941
+
+
+pom 包介绍：
+
+    auto-service 自动导入 javax.annotation.processing.Processor 文件
+
+    javapoet jdk 1.6 以上， 操作生成新的类、方法、属性等
+
+    tools 操作编译期的 语法树
+
+    maven-compiler-plugin 编译插件
+
+
+简单集成demo
+    //  声明处理的 注解
+    @SupportedAnnotationTypes("com.kkIntegration.processor.mysql.SourceAnnotation")
+    //  jdk8 以上
+    @SupportedSourceVersion(SourceVersion.RELEASE_8)
+    //  自动添加配置文件
+    @AutoService(Processor.class)
+    // 必须继承 AbstractProcessor 类
+    public class SourceProcessor extends AbstractProcessor
+
+
+方法内容介绍:
+    // 重写 process
+    // annotations 获取注解元素
+    // env 获取环境
+    @Override
+    public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment env)
+    // 结合 JavaPoet 和 Java抽象语法树AST，JCTree 动态操作即可

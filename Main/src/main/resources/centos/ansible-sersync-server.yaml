@@ -1,0 +1,28 @@
+# sersync 实时同步服务部署
+# 一键创建 sersync 服务，实时备份数据到 rsync 服务器
+- hosts: sersync_server
+  tasks:
+    # 安装 rsync数据备份服务 和 inotify 实时监控服务
+    - name: 01-install rsync and inotify
+      yum:
+        name: ['rsync','inotify-tools']
+        state: installed
+    # 复制 sersync 安装压缩包到对应机器 /usr/local/ 下
+    #- name: 02-push tar.gz to /usr/local/
+    #  copy: src=/usr/local/sersync2.5.4_64bit.tar.gz dest=/usr/local/
+    # 复制并解压数据
+    - name: 03-tar
+      #shell: tar -zxf /usr/local/sersync2.5.4_64bit.tar.gz
+      unarchive: copy=yes src=/software/sersync2.5.4_64bit.tar.gz dest=/usr/local/
+    # 删除压缩包
+    - name: 04-rm tar
+      file: dest=/usr/local/sersync2.5.4_64bit.tar.gz  state=absent
+    # 修改解压后的文件名
+    - name: 05-mv to new file name
+      shell: mv /usr/local/GNU-Linux-x86 /usr/local/sersync
+    # 覆盖 sersync 默认配置文件
+    - name: 06-push conf file
+      copy: src=/etc/ansible/conf/sersync_confxml.xml dest=/usr/local/sersync/confxml.xml
+    # 创建备份所需的密码文件
+    - name: 07-create password file
+      copy: content=ckk123 dest=/etc/sersync.password mode=600

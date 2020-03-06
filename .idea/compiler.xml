@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <option name="USE_RELEASE_OPTION" value="false" />
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="Redis" />
+        <module name="jieba" />
+        <module name="OAuth2Server" />
+        <module name="Common" />
+        <module name="Main" />
+        <module name="Processor" />
+        <module name="OAuth2Resource" />
+        <module name="Echarts" />
+        <module name="BigData" />
+        <module name="OAuth2Common" />
+        <module name="OAuth2SecurityServiceDao" />
+        <module name="RestFulBackEnd" />
+        <module name="Security" />
+        <module name="Mysql" />
+        <module name="Elastic" />
+        <module name="RestFulFrontEnd" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel target="8">
+      <module name="BigData" target="1.8" />
+      <module name="Common" target="1.8" />
+      <module name="Echarts" target="1.8" />
+      <module name="Elastic" target="1.8" />
+      <module name="jieba" target="1.8" />
+      <module name="Main" target="1.8" />
+      <module name="Mysql" target="1.8" />
+      <module name="OAuth2Common" target="1.8" />
+      <module name="OAuth2Resource" target="1.8" />
+      <module name="OAuth2SecurityServiceDao" target="1.8" />
+      <module name="OAuth2Server" target="1.8" />
+      <module name="osbr" target="1.8" />
+      <module name="Processor" target="1.8" />
+      <module name="Redis" target="1.8" />
+      <module name="RestFulBackEnd" target="1.8" />
+      <module name="RestFulFrontEnd" target="1.8" />
+      <module name="Security" target="1.8" />
+    </bytecodeTargetLevel>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="BigData" options="-parameters" />
+      <module name="Common" options="-parameters" />
+      <module name="Echarts" options="-parameters" />
+      <module name="Elastic" options="-parameters" />
+      <module name="Main" options="-parameters" />
+      <module name="Mysql" options="-parameters" />
+      <module name="OAuth2Common" options="-parameters" />
+      <module name="OAuth2Resource" options="-parameters" />
+      <module name="OAuth2SecurityServiceDao" options="-parameters" />
+      <module name="OAuth2Server" options="-parameters" />
+      <module name="Processor" options="-parameters" />
+      <module name="Redis" options="-parameters" />
+      <module name="RestFulBackEnd" options="-parameters" />
+      <module name="RestFulFrontEnd" options="-parameters" />
+      <module name="Security" options="-parameters" />
+      <module name="jieba" options="-parameters" />
+      <module name="osbr" options="-parameters" />
+    </option>
+  </component>
+</project>

@@ -1,0 +1,126 @@
+// git 操作
+1、rpm -qa git
+
+2、yum install git
+   git config
+   -- global  使用全局配置文件
+   -- system  使用系统级配置文件
+   -- local   使用版本库级配置文件
+   // 配置git使用用户
+   git config --global user.name "xx"
+   // 配置git使用邮箱
+   git config --global user.email "xx"
+   // 语法高亮
+   git config --global color.ui true
+   // 查看配置 (在~/.gitconfig里)
+   git config --list
+
+3、初始化
+    mkdir git_data
+    cd git_data/
+    1、初始化
+        git init
+    2、查看工作区状态
+        git status
+    3、添加文件到暂存区
+        git add file 或 git add . 或 git add *
+    4、撤出暂存区
+        git rm --cached <file>
+        git rm -f <file>        # 直接从暂存区和工作区一同删除文件
+    5、提交本地
+        git commit -m "你的说明"
+        git commit -am "你的说明"
+    6、重命名操作
+        平常操作：
+            mv a a.txt      (status : 删除a，新增a.txt)
+            git add a.txt   (status : rename a->a.txt )
+        git命令
+            git mv a a.txt  (暂存区和工作区同时修改， 不需要add)
+    7、比对暂存区和工作区
+        git diff
+        git diff --cached   # 比对暂存区和本地仓库
+    8、查看历史的git commit 快照
+        git log
+            --oneline    # 简单一行显示
+            --decorate   # 显示当前指针指向的位置
+            -p           # 显示具体内容变化
+            -1           # 只显示一条内容
+    9、查看所有的历史log
+        git reflog
+    10、回滚（ 滚动HEAD指针 ） 暂存区到工作目录
+        git reset --hard 3de192     # 回滚某次提交
+    11、分支
+        git branch dev      # 创建dev分支
+        git branch          # *在哪里就说明当前在哪个分支
+        git branch -d dev   # 删除dev分支
+    12、切换当前分支
+        git checkout dev
+        git checkout -b dev     # 创建dev分支，并切换分支到dev
+    13、合并分支(切换到需要合并的分支)
+        git merge dev       # dev合并到当前所在的分支
+        如果有冲突，那么先合并，再进行手动修改
+    14、标签 - 版本里程碑，可以直接回滚
+        git tag -a v1.0 -m "xxxx" ( -a 指定标签名，-m 指定说明文字)
+        git tag
+        git tag -a v2.0 asd1233 -m "xxxx" # 指定一次commit作为tag
+        git reset --hard v2.0
+        git tag -d v2.0     # 删除标签 -d 参数
+    15、远程仓库
+        git remote
+        git remote remove origin
+        git remote add origin git@xxx.git
+        git push -u origin master
+        git push -u origin --all
+        git push -u origin --tags
+        git pull
+        git pull -u origin dev
+    // 隐藏文件介绍
+        branches        # 分支目录
+        config          # 定义项目特有的配置选项
+        description     # 仅供git web 程序使用
+        HEAD            # 指示当前的分支
+        hooks           # 包含git钩子文件
+        info            # 包含一个全局排查文件（exclude文件）
+        object          # 存放所有数据内容，有info和pack两个子文件
+        refs            # 存放指向数据（分支）的提交对象的指针
+        index           # 保存暂存区信息，在执行git init的时候，这个文件还没有
+
+4、提交数据
+工作目录                    暂存区域                    本地仓库                    远程仓库
+   |        git add           |         git commit       |         git push         |
+   |------------------------> |------------------------->| ------------------------>|
+   |        git rm            |                          |        git clone         |
+   |     git reset HEAD       |                          |        git pull          |
+   |<-----------------------  |                          | <------------------------|
+   |                          |                          |                          |
+   |                  git reset --hard 3de192            |                          |
+   |<----------------------------------------------------                           |
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,54 @@
+# 安装java环境 可二进制 或 yum install java -y
+
+# 下载 https://jenkins.io/zh/download/
+jenkins-2.204.2-1.1.noarch.rpm
+
+# 安装本地镜像
+yum localinstall jenkins-2.204.2-1.1.noarch.rpm -y
+
+# getenforce 查看
+# 修改/etc/selinux/config 文件
+# 将SELINUX=enforcing改为SELINUX=disabled
+# 重启机器即可
+
+# 启动：  systemctl start firewalld
+# 查状态：systemctl status firewalld
+# 关闭防火墙: systemctl stop firewalld.service
+
+# 启动
+systemctl start jenkins
+systemctl status jenkins
+
+# http://system.jenkins.com:8080/
+# 解锁 jenkins
+cat /var/lib/jenkins/secrets/initialAdminPassword
+706ffd4075c44944bc79e8e4eb5a647b
+
+# 输入解锁后，出现一直加载问题，是加载插件源问题，修改以下配置，重启即可
+# vi /var/lib/jenkins/hudson.model.UpdateCenter.xml
+# https://mirrors.tuna.tsinghua.edu.cn/jenkins/updates/update-center.json
+
+# 配置登录密码 http://system.jenkins.com:8080/user/admin/configure
+# jenkins123456
+# 登录 ： admin / jenkins123456
+
+# 汉化下载 http://system.jenkins.com:8080/pluginManager/available
+# Locale 、 Localization Support 、 Localization: Chinese (Simplified)
+# 安装重启即可
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

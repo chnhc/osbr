@@ -1,0 +1,12 @@
+server:
+  #端口号
+  port: 9800
+  # 统一入口
+  servlet:
+    context-path: "/dfe"
+
+
+
+
+
+

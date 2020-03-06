@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kkIntegration.ossd.dao.role.RoleDAO" >
+
+
+
+    <select id="selectUserRoleByName"
+            parameterType="String"
+            resultType="com.kkIntegration.ossd.entity.role.UserRoleEntity">
+
+    SELECT u.user_name,u.user_pwd,ru.role_id  FROM role_user ru,USER u WHERE ru.user_id = u.user_id AND u.user_name = #{user_name}
+
+    </select>
+
+
+    <select id="selectFunRole"
+            resultMap="FunRoleMap">
+
+    SELECT role_id , fun_id FROM role_fun
+
+    </select>
+
+    <select id="selectMenuRoleByRoleID"
+            resultType="java.lang.String">
+
+    SELECT menu_id FROM role_menu WHERE role_id = #{role_id}
+
+    </select>
+
+    <select id="selectFunRoleByRoleID"
+            resultType="java.lang.String">
+
+    SELECT fun_id FROM role_fun WHERE role_id = #{role_id}
+
+    </select>
+
+    <resultMap type="com.kkIntegration.ossd.entity.role.FunRoleEntity" id="FunRoleMap">
+
+        <result column="role_id" property="role_id"/>
+        <result column="fun_id" property="fun_id"/>
+
+    </resultMap>
+
+
+    <select id="getAllMenuByRole" resultType="java.lang.String">
+
+        <foreach collection="roles" item="role" separator=" UNION " >
+            SELECT menu_id FROM role_menu WHERE role_id = #{role}
+        </foreach>
+
+    </select>
+
+    <insert id="insertRole"
+            parameterType="com.kkIntegration.ossd.entity.role.RoleEntity">
+
+        INSERT INTO role
+        (role_id, role_name)
+        VALUES
+        (#{role_id}, #{role_name});
+
+    </insert>
+
+
+    <update id="updateRoleId">
+
+        UPDATE `role`
+        SET
+        role_id = #{new_role_id}
+        WHERE
+        id = #{id} AND role_id = #{role_id}
+    </update>
+
+
+    <update id="updateRoleName">
+
+        UPDATE `role`
+        SET
+        role_name = #{new_role_name}
+        WHERE
+        id = #{id} AND role_id = #{role_id}
+    </update>
+
+    <delete id="deleteRole">
+
+        DELETE FROM `role`
+        WHERE
+        id = #{id} AND role_id = #{role_id}
+
+    </delete>
+
+    <delete id="deleteRoleFun">
+
+        DELETE FROM `role_fun`
+        WHERE
+        role_id = #{role_id} AND fun_id = #{fun_id}
+
+    </delete>
+
+    <delete id="insertRoleFun">
+
+         INSERT INTO role_fun
+        (role_id, fun_id)
+        VALUES
+        (#{role_id}, #{fun_id});
+
+    </delete>
+
+    <delete id="deleteRoleMenu">
+
+        DELETE FROM `role_menu`
+        WHERE
+        role_id = #{role_id} AND menu_id = #{menu_id}
+
+    </delete>
+
+    <delete id="insertRoleMenu">
+
+         INSERT INTO role_menu
+        (role_id, menu_id)
+        VALUES
+        (#{role_id}, #{menu_id});
+
+    </delete>
+
+    <select id="selectSimpleAllRoles"
+            resultType="com.kkIntegration.ossd.entity.role.SimpleRoleEntity">
+
+    SELECT role_id ,role_name FROM role
+
+    </select>
+
+    <select id="selectAllRoles" resultMap="findAllRolesMap">
+
+        SELECT r.id, r.role_id, r.role_name, rf.fun_id AS fm_id, f.fun_name AS fm_name, 'fun' AS fm_type FROM role r LEFT JOIN role_fun rf ON  r.role_id = rf.role_id LEFT JOIN `function` f ON rf.fun_id = f.fun_id
+        UNION
+        SELECT r.id, r.role_id, r.role_name, rm.menu_id AS fm_id, m.menu_name AS fm_name, 'menu' AS fm_type FROM role r LEFT JOIN role_menu rm ON  r.role_id = rm.role_id LEFT JOIN menu m ON rm.menu_id = m.menu_id
+
+    </select>
+
+
+    <select id="selectRoleLimit" resultMap="findAllRolesMap">
+
+        SELECT r.id, r.role_id, r.role_name, rf.fun_id AS fm_id, f.fun_name AS fm_name, 'fun' AS fm_type FROM role r LEFT JOIN role_fun rf ON  r.role_id = rf.role_id LEFT JOIN `function` f ON rf.fun_id = f.fun_id
+        UNION
+        SELECT r.id, r.role_id, r.role_name, rm.menu_id AS fm_id, m.menu_name AS fm_name, 'menu' AS fm_type FROM role r LEFT JOIN role_menu rm ON  r.role_id = rm.role_id LEFT JOIN menu m ON rm.menu_id = m.menu_id
+        LIMIT #{form_size}, #{to_size}
+
+    </select>
+
+    <resultMap id="findAllRolesMap" type="com.kkIntegration.ossd.entity.role.OneRolesEntity">
+        <id column="id" property="id"/>
+        <id column="role_id" property="role_id"/>
+        <id column="role_name" property="role_name"/>
+        <collection property="roles" ofType="com.kkIntegration.ossd.entity.role.OneRoleEntity">
+            <id column="fm_id" property="id"/>
+            <result column="fm_name" property="name"/>
+            <result column="fm_type" property="type"/>
+        </collection>
+
+    </resultMap>
+
+    <select id="totalSize" resultType="java.lang.Integer">
+
+        SELECT COUNT(0) FROM role
+
+    </select>
+
+</mapper>

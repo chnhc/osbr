@@ -1,0 +1,107 @@
+
+预先安装好 rsync + inotify
+
+1、 需要下载，保留上传到linux服务器中
+    https://github.com/wsgzao/sersync
+    上传linux服务器
+    PS：软件尽量都统一保存在/server/tools目录中
+
+2、 解压软件压缩包，将解压的数据进行保存
+    tar zxf sersync2.5.4_64bit_binary_stable_final.tar.gz
+    mv GNU-Linux-x86/ /usr/local/sersync
+
+3、 修改confxml.conf
+    vi /app/local/sersync/confxml.xml
+
+    <?xml version="1.0" encoding="ISO-8859-1"?>
+    <head version="2.5">
+     <host hostip="localhost" port="8008"></host>
+     <debug start="true"/>
+     <fileSystem xfs="false"/>
+
+     <filter start="false"> <!-- 说明：排除指定数据信息不要进行实时传输同步 -->
+         <exclude expression="(.*)\.php"></exclude>
+         <exclude expression="^data/*"></exclude>
+     </filter>
+
+     <inotify> <!-- 说明：inotify 配置 -->
+         <delete start="true"/>
+         <createFolder start="true"/>
+         <createFile start="false"/>
+         <closeWrite start="true"/>
+         <moveFrom start="true"/>
+         <moveTo start="true"/>
+         <attrib start="false"/>
+         <modify start="false"/>
+     </inotify>
+
+     <sersync>
+         <localpath watch="/data/"> <!-- 这里填写服务器A要同步的文件夹路径-->
+         <remote ip="192.168.232.121" name="backup"/> <!-- 这里填写服务器B的IP地址和模块名-->
+         <!-- 可设置多个备份服务器，同时备份 -->
+         <!--<remote ip="192.168.28.39" name="tongbu"/>-->
+         <!--<remote ip="192.168.28.40" name="tongbu"/>-->
+         </localpath>
+
+         <rsync>
+             <!-- rsync 参数 -->
+             <commonParams params="-artuz"/>
+             <!-- rsync+密码文件 这里填写服务器B的认证信息-->
+             <auth start="true" users="rsync_backup" passwordfile="/etc/rsync.password"/>
+             <!-- rsync服务端端口 参数 -->
+             <userDefinedPort start="false" port="874"/><!-- port=874 -->
+             <timeout start="false" time="100"/><!-- timeout=100 -->
+             <ssh start="false"/>
+         </rsync>
+
+         <!-- 修改失败日志记录（可选）-->
+         <failLog path="/tmp/rsync_fail_log.sh" timeToExecute="60"/><!--default every 60mins execute once-->
+         <crontab start="false" schedule="600"><!--600mins-->
+             <crontabfilter start="false">
+                 <exclude expression="*.php"></exclude>
+                 <exclude expression="info/*"></exclude>
+             </crontabfilter>
+         </crontab>
+         <plugin start="false" name="command"/>
+     </sersync>
+
+     <!-- 下面这些有关于插件你可以忽略了 -->
+     <plugin name="command">
+     <param prefix="/bin/sh" suffix="" ignoreError="true"/> <!--prefix /opt/tongbu/mmm.sh suffix-->
+     <filter start="false">
+     <include expression="(.*)\.php"/>
+     <include expression="(.*)\.sh"/>
+     </filter>
+     </plugin>
+
+     <plugin name="socket">
+     <localpath watch="/home/demo">
+     <deshost ip="210.36.158.xxx" port="8009"/>
+     </localpath>
+     </plugin>
+     <plugin name="refreshCDN">
+     <localpath watch="/data0/htdocs/cdn.markdream.com/site/">
+     <cdninfo domainname="cdn.chinacache.com" port="80" username="xxxx" passwd="xxxx"/>
+     <sendurl base="http://cdn.markdream.com/cms"/>
+     <regexurl regex="false" match="cdn.markdream.com/site([/a-zA-Z0-9]*).cdn.markdream.com/images"/>
+     </localpath>
+     </plugin>
+    </head>
+
+
+4、 运行sersync
+
+    nohup /usr/local/sersync/sersync2 -r -d -o /usr/local/sersync/confxml.xml >/usr/local/sersync/rsync.log 2>&1 &
+    nohup /usr/local/sersync/sersync2 -r -d -o /usr/local/sersync/img.xml >/usr/local/sersync/img.log 2>&1 &
+
+    ps -ef | grep sersync2
+
+    -d:启用守护进程模式
+    -r:在监控前，将监控目录与远程主机用rsync命令推送一遍
+    -n: 指定开启守护线程的数量，默认为10个
+    -o:指定配置文件，默认使用confxml.xml文件
+
+
+
+
+

@@ -1,0 +1,29 @@
+来自 ： https://blog.csdn.net/zhang33565417/article/details/97634921
+
+4 种解决方法
+
+
+1、 idea昨天还在正常使用，结果今天发现pom文件中的依赖不会自动下载了，
+    最后百度找到了解决方案：
+
+    setting ——> maven ——> 去掉work offline 的勾  ， 问题解决！
+
+    但是我之前用着还是没有这个问题的, 百度发现可能是Intellij idea setting
+    显示出错/或者电脑运行过久出错，在经历几次重启 Intellij idea 和
+    Invalidate caches/Restart之后，发现work offline 的勾被选中。
+
+
+2、  Settings -> Build,Execution,Deployment -> Build Tools -> Maven -> Ignored Files
+
+    这地方如果勾选了就要去掉。
+
+3、 Settings -> Build,Execution,Deployment -> Build Tools -> Maven -> Importing Maven projects automatically 打钩
+
+
+4、 更新不完整依赖命令
+
+    点击maven栏 ， 点击导航栏 三角形 后的 选项，
+    打开了 Run anything 窗口
+    输入 -U idea:idea   命令， 然后点击Execute就行了
+
+

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/BigData/BigData.iml" filepath="$PROJECT_DIR$/BigData/BigData.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Common/Common.iml" filepath="$PROJECT_DIR$/Common/Common.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Echarts/Echarts.iml" filepath="$PROJECT_DIR$/Echarts/Echarts.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Elastic/Elastic.iml" filepath="$PROJECT_DIR$/Elastic/Elastic.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Main/Main.iml" filepath="$PROJECT_DIR$/Main/Main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Mysql/Mysql.iml" filepath="$PROJECT_DIR$/Mysql/Mysql.iml" />
+      <module fileurl="file://$PROJECT_DIR$/OAuth2-Common/OAuth2Common.iml" filepath="$PROJECT_DIR$/OAuth2-Common/OAuth2Common.iml" />
+      <module fileurl="file://$PROJECT_DIR$/OAuth2-Resource/OAuth2Resource.iml" filepath="$PROJECT_DIR$/OAuth2-Resource/OAuth2Resource.iml" />
+      <module fileurl="file://$PROJECT_DIR$/OAuth2-Security-Service-Dao/OAuth2SecurityServiceDao.iml" filepath="$PROJECT_DIR$/OAuth2-Security-Service-Dao/OAuth2SecurityServiceDao.iml" />
+      <module fileurl="file://$PROJECT_DIR$/OAuth2-Server/OAuth2Server.iml" filepath="$PROJECT_DIR$/OAuth2-Server/OAuth2Server.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Processor/Processor.iml" filepath="$PROJECT_DIR$/Processor/Processor.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Redis/Redis.iml" filepath="$PROJECT_DIR$/Redis/Redis.iml" />
+      <module fileurl="file://$PROJECT_DIR$/RestFul-Back-End/RestFulBackEnd.iml" filepath="$PROJECT_DIR$/RestFul-Back-End/RestFulBackEnd.iml" />
+      <module fileurl="file://$PROJECT_DIR$/RestFul-Front-End/RestFulFrontEnd.iml" filepath="$PROJECT_DIR$/RestFul-Front-End/RestFulFrontEnd.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Security/Security.iml" filepath="$PROJECT_DIR$/Security/Security.iml" />
+      <module fileurl="file://$PROJECT_DIR$/jieba/jieba.iml" filepath="$PROJECT_DIR$/jieba/jieba.iml" />
+      <module fileurl="file://$PROJECT_DIR$/osbr.iml" filepath="$PROJECT_DIR$/osbr.iml" />
+    </modules>
+  </component>
+</project>

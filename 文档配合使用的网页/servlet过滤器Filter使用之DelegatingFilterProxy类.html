@@ -1,0 +1,189 @@
+<!DOCTYPE html> <html style lang=zh-cn><!--
+ Page saved with SingleFile 
+ url: https://www.cnblogs.com/flowerbirds/p/10226943.html 
+ saved date: Thu Jan 09 2020 16:16:52 GMT+0800 (中国标准时间)
+--><meta charset=utf-8>
+<meta name=viewport content="width=device-width, initial-scale=1.0">
+<meta name=referrer content=origin>
+<meta property=og:description content="正常情况下，我们需要添加一个过滤器，需要实现javax.servlet.Filter接口，再在web.xml中配置filter，如下： 此时，web.xml中增加的配置： 那么，我们为什么要使用Spr">
+<meta http-equiv=Cache-Control content=no-transform>
+<meta http-equiv=Cache-Control content=no-siteapp>
+<meta http-equiv=X-UA-Compatible content="IE=edge">
+<title>servlet过滤器Filter使用之DelegatingFilterProxy类 - 风雨咒之无上密籍 - 博客园</title>
+<style>:root{--sf-img-3:url("data:image/gif;base64,R0lGODlhFAAUANQHADJKYpKluc3P05qy4jJdta/M92KQ3vv8/nKi4rK/0rLC6mJ6mtHe7sHN4ZW19iJLmUp2wqKy0nKa8iJCgsLV9uLq8qKywnKa2oKy4lKC0qLC8qKqwnKS0oKn7cDI1AAAACH5BAEAAB8ALAAAAAAUABQAAAWE4CeOZGmeaKquLKkoSRwJrXLch7XQa4IfAc+ud6AUGIHCS+NwME6WX6Xw6xAaps2BiUFofpICwVMK3CoVxuDQZBgIhEf50EVc1rgKJSInmRkMDQ0dBx0IBhkZfGUAjY0cOAwUChZ9KQYHiIkZG5YoEAcRohYbAZ4nEHAPq6sTLa+wsSUhADs=")}.cnblogs_code{background-color:#f5f5f5;font-family:Courier New!important;font-size:12px!important;border:1px solid #ccc;padding:5px;overflow:auto;margin:5px 0;color:#000}.cnblogs_code div{background-color:#f5f5f5}.cnblogs_code pre{font-family:Courier New!important;font-size:12px!important;word-wrap:break-word;white-space:pre-wrap}.cnblogs_code span{font-family:Courier New!important;font-size:12px!important;line-height:1.5!important}.cnblogs_code_toolbar a:hover,.cnblogs_code_toolbar a:link,.cnblogs_code_toolbar a:visited,.cnblogs_code_toolbar a:active,.cnblogs_code_toolbar a:link img,.cnblogs_code_toolbar a:visited img{background-color:#f5f5f5!important;border:none!important}pre{margin-top:0;margin-bottom:0}pre{white-space:-moz-pre-wrap!important;white-space:-o-pre-wrap}blockquote{border:2px solid #efefef;padding-left:10px;padding-right:10px;padding-top:5px;padding-bottom:5px;margin-top:10px;margin-bottom:10px}#cnblogs_post_body{margin-bottom:20px}#cnblogs_post_body img{max-width:900px;height:auto}.cnblogs_code_toolbar{margin-top:5px}.cnblogs_code_toolbar span{padding-right:5px}#cnblogs_post_body{word-break:break-word}#cnblogs_post_body p{margin:10px auto;text-indent:0}@-webkit-keyframes ui-dialog-loading{0%{-webkit-transform:rotate(0deg)}100%{-webkit-transform:rotate(360deg)}}@keyframes ui-dialog-loading{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}*{margin:0;padding:0}html{height:100%}body{color:#000;background:#fff;font-family:Verdana,Arial,Helvetica,sans-serif;font-size:9pt;min-height:101%}img{border:0}a:link{color:#000;text-decoration:none}a:visited{color:#000;text-decoration:none}a:hover{color:#f60;text-decoration:underline}a:active{color:#000;text-decoration:none}#home{margin:0 auto;width:95%;min-width:930px}#main{width:100%;min-width:950px;text-align:left}#mainContent .forFlow{margin-left:22em;float:none;width:auto}#mainContent{min-height:200px;padding:0 0 10px 0;-o-text-overflow:ellipsis;text-overflow:ellipsis;overflow:hidden;word-break:break-all;float:right;margin-left:-25em;width:100%}#topics{width:100%;min-height:200px;padding:0 0 10px 0;float:left;-o-text-overflow:ellipsis;text-overflow:ellipsis;overflow:hidden;word-break:break-all}.postBody{padding:5px 2px 5px 5px;line-height:1.5;color:#000;border-bottom:1px solid #000}.postBody a:link,.postBody a:visited,.postBody a:active{text-decoration:underline}.postBody blockquote{background:url(data:image/gif;base64,R0lGODlhIAAYANUAAAAAAP////7+/v39/fz8/Pv7+/r6+vn5+fj4+Pf39/b29vX19fT09PPz8/Ly8vHx8fDw8O/v7+7u7u3t7ezs7Ovr6+rq6unp6ejo6Ofn5+Xl5ePj4+Li4uHh4d7e3tzc3Nvb29TU1NPT09LS0s7OzsnJycPDw8LCwsHBwcDAwL6+vr29vbu7u7m5ubi4uLe3t7a2trW1tbS0tLOzs7KysrCwsP///wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAEAADYALAAAAAAgABgAAAb/wIBwSBwQCoakskAQEJ/QoWHhgEQk2GwE4kgQolBB4nGVRM7oNBayKICFhoY5Ta9fIwow4m7vqxtORHt+W1ZnD4Z/gQEGhBEPFBdWDxYViWgSC04Ccn4PGSYjDg4cKx8OfQcBBIQQGCswGA4bLioUl5h5CHN2DyU0LbcoNSZbdhIPAgy8dBAVKzIyJBowMTIhZHYQA8t9Vik0NCwdLDM0KhO4Z9sHzHQPIC4nHg8iLyYc6lcOAgP6aRgeQZBw4VEfCQmELHDXLM2/dW5WDXRE8QoCIgUmVvST8EmBBww3RugIZYACPiJHvoGzgEzIM1gwkVw5YIqDbGi4NEgQB0uyG5VPBAgdOnSIAAQgAQFd+mTAAQYKFjGdOmBIEAA7) no-repeat 25px 0;padding:10px 60px 5px 60px;min-height:35px;line-height:1.6em;color:#333}</style>
+<style media="only screen and (max-width: 767px)">body{font-size:14px!important;font-family:'PingFang SC','Helvetica Neue','Helvetica','Arial',sans-serif;-webkit-text-size-adjust:none}img{max-width:300px!important;height:auto}#home,#main{width:auto;min-width:initial}#main{padding:0 5px}#mainContent{float:none;margin-left:0}#mainContent .forFlow{margin-left:0}.postBody{padding:5px}</style>
+<link type=application/rss+xml rel=alternate href=https://www.cnblogs.com/flowerbirds/rss>
+<link type=application/rsd+xml rel=EditURI href=https://www.cnblogs.com/flowerbirds/rsd.xml>
+<link type=application/wlwmanifest+xml rel=wlwmanifest href=https://www.cnblogs.com/flowerbirds/wlwmanifest.xml>
+<link type=image/x-icon rel="shortcut icon" href=data:image/x-icon;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAE+0lEQVRYhcWXf2hVZRjHP8/ZVeZay9mwuY1poVM2yMl0nXO3e/2RMpM0+2P7w4qQ6K8gEEwKqegPkTAqo4Lsp0UQRRQaSmYLt7Z7p5uhqxRbxrrXMce0Mda4u7v3ffrjnF33606nq75wOPd934fv8z3ned/nfK9wC6h27DxLZBNQBljAb6p6pDEUjt4oh9xM4oBtW2LJ08CLwFxVvUYoMgi8boy+9GM4HJ9xAdVlZVh35OwDdqpLcAGoBxJANVDuhX6WNPpYUzicmIovYzrJa2trGYwPbQTeBFTgBdBtDc3hw52R6NGCBQvezbCsP4EHgOWWyKWk0tbf3z8zAgrz8kga846q3iMiHw4PJ3Y2tZw0I+vRS126sKDwJywBWAcszZmb+3YkEtF0nNZ0BMSG4zlApYgYYH/o1KkJMQ0tLQAHgBhQYpnkoqk4pyUAZB6QBcRUuZiWdDjRA1wFyLCs/JUrV86QAKEfiAOzRchLF2Z8GdlANoAxGsuaPWvjjAhIJE0f8CvgA7ZPFlNbWwsidUAO0I1QDmyvrKxML+C+FSsIOPai6wkoKi42wFvecFfQ72xZv2ZNan392rVcvhS1gX3e1HvADsDO9GX4JuMUgA0bNjD098DLIuw+0RSa8tz6V63y+Wb5vgIexD37hwS+Vff3aqAO1UxEWoH9wCeAAZY2NIc6xvNlAAwODnJnbu5mYF5nJHp2KgGRri6zsKjoMCJFwHJVLUVkM/CQqi4XEQuRo6rUifAqUOQ9aFtSOTO+J1gA3d3dAGeA54N+J3MqAQANofDAsEk+Djgi8gZwHKgXkQNADcZsFuFeYHThA8XFxRO4UnVR1VYRWQxsAz64nohQ+CTASe8ag2CVbaHsZuwmr85IJCzccqSQChCj54E+4JmA3z/phrlhqGwFguNmS8Rn5Y8PTQnounIljvs0ywTdcrO5g46dB7zGxCNugdhpBXR0dAB87w13BBxnml0SVlc5PkTeByYW20WgpqZmcgEe6r27X4T0/XMSVJSXW6rsBaZ6e/bVrq70Aoyan4EuVbWAp240+doqv3Vb1pw9wM5xSx3A6Iylc27Pzk4rIPHLuThwXEQAtgb8Ttp+P4KgY2cnVQ8Cz45bOiTgAM+NmstRZVFaAWG3SRweCRZ4NF3iasch6HdsRFoYG9cDbM9QHj7RHOpF9Wvc0wWACKVpBQCgehwY9EZP3m/bY2KqqqoI+p0SSzgINEKKsA94BSi7q7Doox9CIQPQEAr3A8dcagUoGc034bzHksm+TJ+vHrfXlw5bYgPNAb+dJcg61DwBbPLER4EG4DvgSHtr29W/4pP60C+BOq+0d1dUVNDW1ja5AGMU4AtPAMDeoN/pwW2rUeA08AjQatRE9fc/Ek09PZMlTUGVY+J6iRygYCQ5pHHFAcfOE5FOXPczHglcUzKA63p6vXsP0CPQqXBekXBjc3PqdQT9zqequk1ETi+bN1Rx4JvTQBpDEu2+3Itbz17c/RDzrj6g30vY54kY8OZ6cZNfEKGDxPD4z/pBrwR550cdzLT/C+bPn0/p4sW+JOrD87Q+yzJqkqY/NmSS8bjJLyoiEomwZMkS2tvbuXgxrU0k4Pf7BD0H5EvS5J5oaUlMKeDfQNDv7AL2qGphYyjcA9N2xbcGVf0YiIlQMDL3nwpoDIW7gc9B/h8BHvbDNUt/a8bjJqBGzyLERsb/AKulzmJdLC+gAAAAAElFTkSuQmCC></head>
+<body>
+ <a name=top style=display:none!important></a>
+ 
+ 
+<div id=home>
+<div id=header style=display:none!important>
+ 
+ 
+</div>
+<div id=main>
+ <div id=mainContent>
+ <div class=forFlow>
+ <div id=post_detail>
+ 
+ <div id=topics>
+ <div class=post>
+ <h1 class=postTitle style=display:none!important>
+ 
+ </h1>
+ <div class=clear style=display:none!important></div>
+ <div class=postBody>
+ 
+<div id=cnblogs_post_body class=blogpost-body>
+ <p><span style=font-size:16px>　　正常情况下，我们需要添加一个过滤器，需要实现<strong>javax.servlet.Filter</strong>接口，再在web.xml中配置filter，如下：</span></p>
+<div class=cnblogs_code><div class=cnblogs_code_toolbar><span class=cnblogs_code_copy><a href=https://www.cnblogs.com/flowerbirds/p/10226943.html title=复制代码><img src='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><rect fill-opacity="0"/></svg>' alt=复制代码 style="background-blend-mode:normal!important;background-clip:content-box!important;background-position:50% 50%!important;background-color:rgb(245,245,245)!important;background-image:var(--sf-img-3)!important;background-size:100% 100%!important;background-origin:content-box!important;background-repeat:no-repeat!important"></a></span></div>
+<pre><span style=color:#0000ff>package</span><span style=color:#000000> cc.eabour.webapp.security.filter;
+
+</span><span style=color:#0000ff>import</span><span style=color:#000000> java.io.IOException;
+
+</span><span style=color:#0000ff>import</span><span style=color:#000000> javax.servlet.Filter;
+</span><span style=color:#0000ff>import</span><span style=color:#000000> javax.servlet.FilterChain;
+</span><span style=color:#0000ff>import</span><span style=color:#000000> javax.servlet.FilterConfig;
+</span><span style=color:#0000ff>import</span><span style=color:#000000> javax.servlet.ServletException;
+</span><span style=color:#0000ff>import</span><span style=color:#000000> javax.servlet.ServletRequest;
+</span><span style=color:#0000ff>import</span><span style=color:#000000> javax.servlet.ServletResponse;
+
+</span><span style=color:#0000ff>public</span> <span style=color:#0000ff>class</span> XssFilter <span style=color:#0000ff>implements</span><span style=color:#000000> Filter {
+
+    </span><span style=color:#0000ff>private</span> String enable = <span style=color:#0000ff>null</span><span style=color:#000000>;
+    
+    </span><span style=color:#0000ff>public</span> <span style=color:#0000ff>void</span> init(FilterConfig filterConfig) <span style=color:#0000ff>throws</span><span style=color:#000000> ServletException {
+        </span><span style=color:#008000>//</span><span style=color:#008000> Auto-generated method stub</span>
+        enable = filterConfig.getInitParameter("enable"<span style=color:#000000>);
+    }
+
+    </span><span style=color:#0000ff>public</span> <span style=color:#0000ff>void</span><span style=color:#000000> doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+            </span><span style=color:#0000ff>throws</span><span style=color:#000000> IOException, ServletException {
+        </span><span style=color:#008000>//</span><span style=color:#008000> Auto-generated method stub
+        </span><span style=color:#008000>//</span><span style=color:#008000> Do XSS Filter (WrapperRequest)</span>
+<span style=color:#000000>        chain.doFilter(request, response);
+    }
+
+    </span><span style=color:#0000ff>public</span> <span style=color:#0000ff>void</span><span style=color:#000000> destroy() {
+        </span><span style=color:#008000>//</span><span style=color:#008000> TODO Auto-generated method stub</span>
+<span style=color:#000000>        
+    }
+
+}</span></pre>
+<div class=cnblogs_code_toolbar><span class=cnblogs_code_copy><a href=https://www.cnblogs.com/flowerbirds/p/10226943.html title=复制代码><img src='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><rect fill-opacity="0"/></svg>' alt=复制代码 style="background-blend-mode:normal!important;background-clip:content-box!important;background-position:50% 50%!important;background-color:rgb(245,245,245)!important;background-image:var(--sf-img-3)!important;background-size:100% 100%!important;background-origin:content-box!important;background-repeat:no-repeat!important"></a></span></div></div>
+<p>&nbsp;</p>
+<p><span style=font-size:16px>此时，web.xml中增加的配置：</span></p>
+<p>&nbsp;</p>
+<div class=cnblogs_code><div class=cnblogs_code_toolbar><span class=cnblogs_code_copy><a href=https://www.cnblogs.com/flowerbirds/p/10226943.html title=复制代码><img src='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><rect fill-opacity="0"/></svg>' alt=复制代码 style="background-blend-mode:normal!important;background-clip:content-box!important;background-position:50% 50%!important;background-color:rgb(245,245,245)!important;background-image:var(--sf-img-3)!important;background-size:100% 100%!important;background-origin:content-box!important;background-repeat:no-repeat!important"></a></span></div>
+<pre>    <span style=color:#0000ff>&lt;</span><span style=color:maroon>filter</span><span style=color:#0000ff>&gt;</span>
+        <span style=color:#0000ff>&lt;</span><span style=color:maroon>filter-name</span><span style=color:#0000ff>&gt;</span>xssFilter<span style=color:#0000ff>&lt;/</span><span style=color:maroon>filter-name</span><span style=color:#0000ff>&gt;</span>
+        <span style=color:#0000ff>&lt;</span><span style=color:maroon>filter-class</span><span style=color:#0000ff>&gt;</span>cc.eabour.webapp.security.filter.XssFilter<span style=color:#0000ff>&lt;/</span><span style=color:maroon>filter-class</span><span style=color:#0000ff>&gt;</span>
+    <span style=color:#0000ff>&lt;/</span><span style=color:maroon>filter</span><span style=color:#0000ff>&gt;</span>
+    <span style=color:#0000ff>&lt;</span><span style=color:maroon>filter-mapping</span><span style=color:#0000ff>&gt;</span>
+        <span style=color:#0000ff>&lt;</span><span style=color:maroon>filter-name</span><span style=color:#0000ff>&gt;</span>xssFilter<span style=color:#0000ff>&lt;/</span><span style=color:maroon>filter-name</span><span style=color:#0000ff>&gt;</span>
+        <span style=color:#0000ff>&lt;</span><span style=color:maroon>url-pattern</span><span style=color:#0000ff>&gt;</span>/*<span style=color:#0000ff>&lt;/</span><span style=color:maroon>url-pattern</span><span style=color:#0000ff>&gt;</span>
+    <span style=color:#0000ff>&lt;/</span><span style=color:maroon>filter-mapping</span><span style=color:#0000ff>&gt;</span></pre>
+<div class=cnblogs_code_toolbar><span class=cnblogs_code_copy><a href=https://www.cnblogs.com/flowerbirds/p/10226943.html title=复制代码><img src='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><rect fill-opacity="0"/></svg>' alt=复制代码 style="background-blend-mode:normal!important;background-clip:content-box!important;background-position:50% 50%!important;background-color:rgb(245,245,245)!important;background-image:var(--sf-img-3)!important;background-size:100% 100%!important;background-origin:content-box!important;background-repeat:no-repeat!important"></a></span></div></div>
+<p>&nbsp;</p>
+<p><span style=font-size:16px>　　那么，我们为什么要使用Spring的<a href=https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/web/filter/DelegatingFilterProxy.html target=_blank><strong>org.springframework.web.filter.DelegatingFilterProxy</strong></a>类呢？其中，最主要的目的还是我们添加的过滤器，需要使用spring中的某些bean，即<strong>委托Spring来管理过滤器的生命周期。</strong>当然，使用了这个代理类，需要设置参数targetFilterLifecycle为true才能让spring来管理，否则就是一个正常的filter，其生命周期会被servlet容器管理。配置如下：</span></p>
+<p>&nbsp;</p>
+<div class=cnblogs_code><div class=cnblogs_code_toolbar><span class=cnblogs_code_copy><a href=https://www.cnblogs.com/flowerbirds/p/10226943.html title=复制代码><img src='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><rect fill-opacity="0"/></svg>' alt=复制代码 style="background-blend-mode:normal!important;background-clip:content-box!important;background-position:50% 50%!important;background-color:rgb(245,245,245)!important;background-image:var(--sf-img-3)!important;background-size:100% 100%!important;background-origin:content-box!important;background-repeat:no-repeat!important"></a></span></div>
+<pre><span style=color:#0000ff>package</span><span style=color:#000000> cc.eabour.webapp.security.filter;
+
+</span><span style=color:#0000ff>import</span><span style=color:#000000> java.io.IOException;
+
+</span><span style=color:#0000ff>import</span><span style=color:#000000> javax.servlet.Filter;
+</span><span style=color:#0000ff>import</span><span style=color:#000000> javax.servlet.FilterChain;
+</span><span style=color:#0000ff>import</span><span style=color:#000000> javax.servlet.FilterConfig;
+</span><span style=color:#0000ff>import</span><span style=color:#000000> javax.servlet.ServletException;
+</span><span style=color:#0000ff>import</span><span style=color:#000000> javax.servlet.ServletRequest;
+</span><span style=color:#0000ff>import</span><span style=color:#000000> javax.servlet.ServletResponse;
+
+</span><span style=color:#0000ff>import</span><span style=color:#000000> org.springframework.beans.factory.annotation.Autowired;
+</span><span style=color:#0000ff>import</span><span style=color:#000000> org.springframework.stereotype.Service;
+
+</span><span style=color:#0000ff>import</span><span style=color:#000000> cc.eabour.webapp.service.IResourceService;
+
+@Service(</span>"securityXssFilter"<span style=color:#000000>)
+</span><span style=color:#0000ff>public</span> <span style=color:#0000ff>class</span> XssFilter <span style=color:#0000ff>implements</span><span style=color:#000000> Filter {
+
+    </span><span style=color:#0000ff>private</span> String enable = <span style=color:#0000ff>null</span><span style=color:#000000>;
+    
+    @Autowired
+    </span><span style=color:#0000ff>private</span><span style=color:#000000> IResourceService reosurceService;
+    
+    
+    </span><span style=color:#0000ff>public</span> <span style=color:#0000ff>void</span> init(FilterConfig filterConfig) <span style=color:#0000ff>throws</span><span style=color:#000000> ServletException {
+        </span><span style=color:#008000>//</span><span style=color:#008000> Auto-generated method stub</span>
+        enable = filterConfig.getInitParameter("enable"<span style=color:#000000>);
+    }
+
+    </span><span style=color:#0000ff>public</span> <span style=color:#0000ff>void</span><span style=color:#000000> doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+            </span><span style=color:#0000ff>throws</span><span style=color:#000000> IOException, ServletException {
+        </span><span style=color:#008000>//</span><span style=color:#008000> Auto-generated method stub
+        </span><span style=color:#008000>//</span><span style=color:#008000> Do XSS Filter (WrapperRequest)</span>
+<span style=color:#000000>        reosurceService.work();
+        chain.doFilter(request, response);
+    }
+
+    </span><span style=color:#0000ff>public</span> <span style=color:#0000ff>void</span><span style=color:#000000> destroy() {
+        </span><span style=color:#008000>//</span><span style=color:#008000> TODO Auto-generated method stub</span>
+<span style=color:#000000>        
+    }
+
+}</span></pre>
+<div class=cnblogs_code_toolbar><span class=cnblogs_code_copy><a href=https://www.cnblogs.com/flowerbirds/p/10226943.html title=复制代码><img src='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><rect fill-opacity="0"/></svg>' alt=复制代码 style="background-blend-mode:normal!important;background-clip:content-box!important;background-position:50% 50%!important;background-color:rgb(245,245,245)!important;background-image:var(--sf-img-3)!important;background-size:100% 100%!important;background-origin:content-box!important;background-repeat:no-repeat!important"></a></span></div></div>
+<p>&nbsp;</p>
+<p>&nbsp;<span style=font-size:16px>web.xml配置：</span></p>
+<div class=cnblogs_code><div class=cnblogs_code_toolbar><span class=cnblogs_code_copy><a href=https://www.cnblogs.com/flowerbirds/p/10226943.html title=复制代码><img src='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><rect fill-opacity="0"/></svg>' alt=复制代码 style="background-blend-mode:normal!important;background-clip:content-box!important;background-position:50% 50%!important;background-color:rgb(245,245,245)!important;background-image:var(--sf-img-3)!important;background-size:100% 100%!important;background-origin:content-box!important;background-repeat:no-repeat!important"></a></span></div>
+<pre>    <span style=color:#0000ff>&lt;</span><span style=color:maroon>filter</span><span style=color:#0000ff>&gt;</span>
+        <span style=color:#0000ff>&lt;</span><span style=color:maroon>filter-name</span><span style=color:#0000ff>&gt;</span>securityXssFilter<span style=color:#0000ff>&lt;/</span><span style=color:maroon>filter-name</span><span style=color:#0000ff>&gt;</span>
+        <span style=color:#0000ff>&lt;</span><span style=color:maroon>filter-class</span><span style=color:#0000ff>&gt;</span>org.springframework.web.filter.DelegatingFilterProxy<span style=color:#0000ff>&lt;/</span><span style=color:maroon>filter-class</span><span style=color:#0000ff>&gt;</span>
+        <span style=color:#0000ff>&lt;</span><span style=color:maroon>init-param</span><span style=color:#0000ff>&gt;</span>
+            <span style=color:#0000ff>&lt;</span><span style=color:maroon>param-name</span><span style=color:#0000ff>&gt;</span>targetFilterLifecycle<span style=color:#0000ff>&lt;/</span><span style=color:maroon>param-name</span><span style=color:#0000ff>&gt;</span>
+            <span style=color:#0000ff>&lt;</span><span style=color:maroon>param-value</span><span style=color:#0000ff>&gt;</span>true<span style=color:#0000ff>&lt;/</span><span style=color:maroon>param-value</span><span style=color:#0000ff>&gt;</span>
+        <span style=color:#0000ff>&lt;/</span><span style=color:maroon>init-param</span><span style=color:#0000ff>&gt;</span>
+        <span style=color:#008000>&lt;!--</span><span style=color:#008000> 可以添加自定义参数 </span><span style=color:#008000>--&gt;</span>
+        <span style=color:#0000ff>&lt;</span><span style=color:maroon>init-param</span><span style=color:#0000ff>&gt;</span>
+            <span style=color:#0000ff>&lt;</span><span style=color:maroon>param-name</span><span style=color:#0000ff>&gt;</span>enable<span style=color:#0000ff>&lt;/</span><span style=color:maroon>param-name</span><span style=color:#0000ff>&gt;</span>
+            <span style=color:#0000ff>&lt;</span><span style=color:maroon>param-value</span><span style=color:#0000ff>&gt;</span>true<span style=color:#0000ff>&lt;/</span><span style=color:maroon>param-value</span><span style=color:#0000ff>&gt;</span>
+        <span style=color:#0000ff>&lt;/</span><span style=color:maroon>init-param</span><span style=color:#0000ff>&gt;</span>
+    <span style=color:#0000ff>&lt;/</span><span style=color:maroon>filter</span><span style=color:#0000ff>&gt;</span>
+    <span style=color:#0000ff>&lt;</span><span style=color:maroon>filter-mapping</span><span style=color:#0000ff>&gt;</span>
+        <span style=color:#0000ff>&lt;</span><span style=color:maroon>filter-name</span><span style=color:#0000ff>&gt;</span>securityXssFilter<span style=color:#0000ff>&lt;/</span><span style=color:maroon>filter-name</span><span style=color:#0000ff>&gt;</span>
+        <span style=color:#0000ff>&lt;</span><span style=color:maroon>url-pattern</span><span style=color:#0000ff>&gt;</span>/*<span style=color:#0000ff>&lt;/</span><span style=color:maroon>url-pattern</span><span style=color:#0000ff>&gt;</span>
+    <span style=color:#0000ff>&lt;/</span><span style=color:maroon>filter-mapping</span><span style=color:#0000ff>&gt;</span></pre>
+<div class=cnblogs_code_toolbar><span class=cnblogs_code_copy><a href=https://www.cnblogs.com/flowerbirds/p/10226943.html title=复制代码><img src='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"><rect fill-opacity="0"/></svg>' alt=复制代码 style="background-blend-mode:normal!important;background-clip:content-box!important;background-position:50% 50%!important;background-color:rgb(245,245,245)!important;background-image:var(--sf-img-3)!important;background-size:100% 100%!important;background-origin:content-box!important;background-repeat:no-repeat!important"></a></span></div></div>
+<p><span style=font-size:16px>　　</span><span style=font-size:16px>Spring在初始化过滤器的时候，会根据过滤器的名称去寻找对应代理的过滤器，也可以通过参数<strong>targetBeanName</strong>参数来制定对应的过滤器bean名称。</span><span style=font-size:16px>如果把初始化参数<strong>targetFilterLifecycle</strong>修改为<strong>false</strong>或不添加，则代理的过滤器为普通的，不受Spring管理。</span></p>
+<p>&nbsp;</p>
+<p><span style=font-size:16px>　　以下为摘自Spring的文档：</span></p>
+<blockquote>
+<p><span style=font-size:16px>Proxy for a standard Servlet Filter, delegating to a Spring-managed bean that implements the Filter interface. Supports a "<strong>targetBeanName</strong>" filter init-param in&nbsp;<strong><code>web.xml</code></strong>, specifying the name of the target bean in the Spring application context.</span></p>
+<p><span style=font-size:16px><code>web.xml</code>&nbsp;will usually contain a&nbsp;<strong><code>DelegatingFilterProxy</code>&nbsp;</strong>definition, with the specified&nbsp;<strong><code>filter-name</code></strong>&nbsp;corresponding to a bean name in Spring's root application context. All calls to the filter proxy will then be delegated to that bean in the Spring context, which is required to implement the standard Servlet Filter interface.</span></p>
+<p>&nbsp;</p>
+<p><span style=font-size:16px>This approach is particularly useful for Filter implementation with complex setup needs, allowing to apply the full Spring bean definition machinery to Filter instances. Alternatively, consider standard Filter setup in combination with looking up service beans from the Spring root application context.</span></p>
+<p>&nbsp;</p>
+<p><span style=font-size:16px><strong>NOTE:</strong>&nbsp;The lifecycle methods defined by the Servlet Filter interface will by default&nbsp;<em>not</em>&nbsp;be delegated to the target bean, relying on the Spring application context to manage the lifecycle of that bean. Specifying the "<strong>targetFilterLifecycle</strong>" filter init-param as "<strong>true</strong>" will enforce invocation of the&nbsp;<code>Filter.init</code>&nbsp;and&nbsp;<code>Filter.destroy</code>&nbsp;lifecycle methods on the target bean, letting the servlet container manage the filter lifecycle.</span></p>
+<p>&nbsp;</p>
+</blockquote>
+</div>
+ </div>
+ 
+ </div>
+ 
+ 
+ </div>
+</div>
+ </div>
+ </div>
+ 
+ 
+ </div>
+ 
+ 
+</div>
+ 

@@ -1,0 +1,96 @@
+1、查看的命令作用
+    man shutdown
+
+2、关机
+    shutdown -h 5  --- 指定5分钟后关机
+    shutdown -r 5
+
+3、检查文件是否存在
+    ls /etc/hosts
+    ls -d /etc  有针对查看目录信息
+    ls  -l /etc/services       --- 查看文件数据的详细信息
+
+4、创建新的目录
+    mkdir /data
+    mkdir -p /data/p 创建多级目录
+
+5、进行目录的切换
+    cd .. 回上级目录
+    cd -  回上次目录
+
+6、查看当前所在路径
+    pwd
+
+7、telnet
+
+
+
+8、快捷方式的使用方法
+    ctrl+a     将光标快速移动到行首
+    ctrl+e     将光标快速移动到行尾
+    ctrl+?? ?? 将光标按单词快速左右移动
+    ctrl+w     将空格分隔的一个字符串整体进行删除（剪切）
+    ctrl+u     将光标所在位置到行首内容进行删除（剪切）
+    ctrl+k     将光标所在位置到行尾内容进行删除（剪切）
+    ctrl+y     粘贴剪切的内容
+    ctrl+s     xshell进入到了锁定状态 suo锁
+    ctrl+q     解除锁定状态           quit推出锁定状态
+
+
+9、监控服务器常用命令
+    CPU: top htop glances
+        监控什么:
+    	us: user state 		用户态信息 40%
+    	sy: system state	内核态信息 40%  MySQL进程
+    	id: idle            空闲状态   20%
+        内存: top htop free
+    	监控什么:
+    	内存可用率:
+    	swap空间使用情况:
+    	磁盘: df iotop(检查磁盘io消耗) glances
+    	监控什么:
+    	磁盘使用情况
+    	磁盘的IO消耗
+    	网络: iftop glances
+    	监控什么:
+    	网络带宽使用情况
+    	进程: top htop ps glances
+    	监控什么:
+    	占用内存情况 tomcat(java)---内存占满(内存溢出)--服务出现僵死(重启服务)
+    	占用CPU情况: MySQL
+    	负载: w top uptime glances
+    	监控什么:
+    	10分钟负载  <CPU内核数
+    	15分钟负载
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

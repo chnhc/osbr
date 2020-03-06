@@ -1,0 +1,38 @@
+
+模块介绍：
+
+    Main ：  执行项目文件 与 yml 的配置文件 和 Mysql 数据库文件， 缺少 打包、提交项目的脚本文件！
+
+    Common ：  所有模块的公共依赖
+
+    Echarts ：  web 项目 ，主要是生成图表
+
+    jieba ：  结巴分词技术，实现QQ信息摘取，关键信息，保存及输出
+
+    Mysql : mysql 数据库连接的模块，目前使用 自定义多数据源，请参考《 文档：Atomkos-多数据源+事务 》
+
+    OAuth2* ： oauth2 认证模块，重写许多自定义(续签、鉴权、异常)，
+            com.kkIntegration.OAuth2Server.configuration.OAuthServerConfigurer  认证服务器：详细描述更改地方
+            com.kkIntegration.OAuth2Resource.configuration.OAuthResourceConfigurer 资源服务器：详细描述更改地方
+            请仔细研读，可参考学习文档
+
+            * 请先查看 Security 模块 ，再来查看学习 OAuth2* 模块
+
+    Security ： 安全权限模块，舍弃了默认鉴权方案，使用自定义鉴权方案 通过 Map ， 从数据库和本地配置预加载权限，实现灵活接口鉴权
+
+    RestFul* ： 是接口模块 ，需要依赖其他模块  BackEnd 是后台； FrontEnd 是前端
+
+    processor ： 编译期自动生成新的类文件
+
+    Redis ： 是 Redis 模块集合操作 ( 未实现 )
+
+    Elastic ： 是 Elastic stark 模块集合操作 ( 未实现 )
+
+    聊天Netty 模块 待添加
+
+    脚本执行 模块 待添加
+
+
+存在问题：
+
+    重写权限相关的sql语句

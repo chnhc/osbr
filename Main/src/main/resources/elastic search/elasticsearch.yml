@@ -1,0 +1,98 @@
+# ---------------------------------- Cluster -----------------------------------
+#
+# 集群名称:
+#
+cluster.name: my-application
+#
+# 集群内同时启动的数据任务个数，默认是2个
+#cluster.routing.allocation.cluster_concurrent_rebalance: 32
+#
+# 添加或删除节点及负载均衡时并发恢复的线程个数，默认4个
+#cluster.routing.allocation.node_concurrent_recoveries: 32
+#
+#初始化数据恢复时，并发恢复线程的个数，默认4个
+#cluster.routing.allocation.node_initial_primaries_recoveries: 32
+#
+# ------------------------------------ 节点 ------------------------------------
+#
+#是否是master节点
+node.master: true
+#是否允许该节点存储索引数据
+node.data: true
+#
+# 配置每个节点的名称，每个节点都是集群的一部分，每个节点名称都不要相同，可以按照顺序编号:
+#
+node.name: node-1
+#
+# 向节点添加自定义属性:
+#
+#node.attr.rack: r1
+#
+# ----------------------------------- 存储路径 ------------------------------------
+#
+# 存储数据的目录路径（用逗号分隔多个位置）:
+#
+path.data: /usr/data/elastic/search/data
+#
+# 日志存储目录:
+#
+path.logs: /usr/data/elastic/search/logs
+#
+# ----------------------------------- 内存 -----------------------------------
+#
+# 启动时锁定内存:
+#
+bootstrap.memory_lock: true
+#
+# Make sure that the heap size is set to about half the memory available
+# on the system and that the owner of the process is allowed to use this
+# limit.
+#
+# Elasticsearch performs poorly when the system is swapping the memory.
+#
+# ---------------------------------- 网络 -----------------------------------
+#
+# 绑定特定ip (IPv4 or IPv6):
+# 默认是无法公开访问的，如果设置为主机的公网 IP 或 0.0.0.0 就是可以公开访问的
+
+network.host: 192.168.232.205
+#
+# 配置访问的端口，默认是 9200:
+#
+http.port: 9200
+#
+#是否开启跨域访问
+http.cors.enabled: true
+#
+#开启跨域访问后的地址限制，*表示无限制
+http.cors.allow-origin: "*"
+#
+# For more information, consult the network module documentation.
+#
+# --------------------------------- 服务发现 ----------------------------------
+#
+# Pass an initial list of hosts to perform discovery when this node is started:
+# The default list of hosts is ["127.0.0.1", "[::1]"]
+# 集群主机列表
+#
+discovery.seed_hosts: ["192.168.232.205", "192.168.232.206"]
+#
+# 启动全新的集群时需要此参数，再次重新启动时此参数可免
+#
+cluster.initial_master_nodes: ["192.168.232.205", "192.168.232.206"]
+#
+# For more information, consult the discovery and cluster formation module documentation.
+#
+# ---------------------------------- Gateway -----------------------------------
+#
+# Block initial recovery after a full cluster restart until N nodes are started:
+#
+#gateway.recover_after_nodes: 3
+#
+# For more information, consult the gateway module documentation.
+#
+# ---------------------------------- Various -----------------------------------
+#
+# Require explicit names when deleting indices:
+#
+#action.destructive_requires_name: true

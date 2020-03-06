@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: com.googlecode.libphonenumber:carrier:1.75">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/googlecode/libphonenumber/carrier/1.75/carrier-1.75.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/com/googlecode/libphonenumber/carrier/1.75/carrier-1.75-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/googlecode/libphonenumber/carrier/1.75/carrier-1.75-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

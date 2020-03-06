@@ -1,0 +1,78 @@
+MyMapperScannerRegistrar
+参考、学习播客git
+
+    同一个服务连接不同数据源使用atomikos实现事务一致性
+    https://github.com/liangyt/SpringBootDruidMultiDataSource
+
+    SpringBoot2.X 集成Atomikos、Druid 实现多数据源及对分布式事务的应用
+    https://github.com/liaozihong/SpringBoot-Learning/tree/master/SpringBoot-JTA-Atomikos
+
+
+本项目实现 - 配置自动化注入 -  SpringBoot2.X 集成Atomikos、Druid 。
+
+在 Mysql 模块中
+
+特别注意：
+    但有多个读、写数据源时，需要自行封装处理 ，单个读写分离数据源，完全没问题
+
+    * 只有表引擎是  INNODB  时， 事务才生效
+
+    1、java类介绍、流程简述
+       com.kkIntegration.mysql.configuration.DataSourceRegistryPostProcessor
+            实现 BeanDefinitionRegistryPostProcessor, ResourceLoaderAware 接口
+
+        - 通过获取 BeanDefinitionRegistry 工厂，根据自定义配置，
+
+        - 手动注入 AtomikosDataSourceBean - SqlSessionFactoryBean - SqlSessionTemplate
+
+        - 再通过，MyMapperScannerRegistrar ( 仿 @MapperScan 中 MapperScannerRegistrar ) 注册 mybatis 扫描 Mapper
+
+
+    2、配置属性说明 application-xa.yml
+
+        xaType : Atomikos 支持 MysqlXA,DruidXA ; kkincegration.jtaatomikos.xaType 配置 (com.kkIntegration.mysql.properties.XAType)
+
+        datasourceList : 数据源列表，按照需要配置
+
+
+    3、 注意： 配置文件只支持 application-xa.yml 展示的。
+
+        如果 需要添加，可以根据需要对 com.kkIntegration.mysql.properties 中属性添加
+
+        DataSourceEntity 配置  MysqlXA 属性 和 DruidXA 属性  -- 公共
+
+        XaProperties 配置 DruidXA 属性 -- druid 需要添加
+
+ ********
+
+    4、  特别注意：
+
+         如果进行了属性修改 ：
+
+            特别注意需要添加
+            com.kkIntegration.mysql.properties.DataSourceProperties # loadEnvironment()
+            和
+            com.kkIntegration.mysql.properties.XaProperties 属性
+
+
+ ********
+    5、 使用提示：
+
+            根据需要和要求更改配置文件，默认参考 application-xa.yml 展示的
+
+            注意以下三点：
+
+                1、 beanName 是唯一的 Bean 名称
+
+                2、mapperPath 数据源使用的 mapper (格式 mapper/oauth/*.xml ，
+                不要 / 开头 ，默认会自动添加前缀 classpath*:  注意： 路径需要唯一)
+
+                3、daoPackages 是 DAO 接口对应 mapper 的 包路径 ， 可以多个  , 分割 中间不要空格
+
+                可以通过  mapperPath 、 daoPackages 进行读写分离操作
+
+
+            其他按要求更改 和 配置！
+            其他按要求更改 和 配置！
+            其他按要求更改 和 配置！
+

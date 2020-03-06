@@ -1,0 +1,141 @@
+
+filter 过滤器将以 过滤器将以 DelegatingFilterProxy 代理生命周期
+
+详细 ：
+    DelegatingFilterProxy的作用与用法.html
+    https://www.cnblogs.com/zhanhaitao/p/7857245.html
+
+
+简介：
+    servlet过滤器Filter使用之DelegatingFilterProxy类.html
+    https://www.cnblogs.com/flowerbirds/p/10226943.html
+
+    正常情况下，我们需要添加一个过滤器，需要实现javax.servlet.Filter接口，再在web.xml中配置filter，如下：
+
+
+    public class XssFilter implements Filter {
+
+        private String enable = null;
+
+        public void init(FilterConfig filterConfig) throws ServletException {
+            // Auto-generated method stub
+            enable = filterConfig.getInitParameter("enable");
+        }
+
+        public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+                throws IOException, ServletException {
+            // Auto-generated method stub
+            // Do XSS Filter (WrapperRequest)
+            chain.doFilter(request, response);
+        }
+
+        public void destroy() {
+            // TODO Auto-generated method stub
+
+        }
+
+    }
+
+
+    此时，web.xml中增加的配置：
+
+
+
+        <filter>
+            <filter-name>xssFilter</filter-name>
+            <filter-class>cc.eabour.webapp.security.filter.XssFilter</filter-class>
+        </filter>
+        <filter-mapping>
+            <filter-name>xssFilter</filter-name>
+            <url-pattern>/*</url-pattern>
+        </filter-mapping>
+
+    -------------------------------------------------------------------------------------------------------------------
+
+
+    那么，我们为什么要使用Spring的org.springframework.web.filter.DelegatingFilterProxy类呢？
+    其中，最主要的目的还是我们添加的过滤器，需要使用spring中的某些bean，即委托Spring来管理过滤器的生命周期。
+    当然，使用了这个代理类，需要设置参数targetFilterLifecycle为true才能让spring来管理，否则就是一个正常的filter，其生命周期会被servlet容器管理。配置如下：
+
+
+    @Service("securityXssFilter")
+    public class XssFilter implements Filter {
+
+        private String enable = null;
+
+        @Autowired
+        private IResourceService reosurceService;
+
+
+        public void init(FilterConfig filterConfig) throws ServletException {
+            // Auto-generated method stub
+            enable = filterConfig.getInitParameter("enable");
+        }
+
+        public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+                throws IOException, ServletException {
+            // Auto-generated method stub
+            // Do XSS Filter (WrapperRequest)
+            reosurceService.work();
+            chain.doFilter(request, response);
+        }
+
+        public void destroy() {
+            // TODO Auto-generated method stub
+
+        }
+
+    }
+
+
+
+
+     web.xml配置：
+
+        <filter>
+            <filter-name>securityXssFilter</filter-name>
+            <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+            <init-param>
+                <param-name>targetFilterLifecycle</param-name>
+                <param-value>true</param-value>
+            </init-param>
+            <!-- 可以添加自定义参数 -->
+            <init-param>
+                <param-name>enable</param-name>
+                <param-value>true</param-value>
+            </init-param>
+        </filter>
+        <filter-mapping>
+            <filter-name>securityXssFilter</filter-name>
+            <url-pattern>/*</url-pattern>
+        </filter-mapping>
+
+
+
+
+    　　Spring在初始化过滤器的时候，会根据过滤器的名称去寻找对应代理的过滤器，
+        也可以通过参数targetBeanName参数来制定对应的过滤器bean名称。
+        如果把初始化参数targetFilterLifecycle修改为false或不添加，则代理的过滤器为普通的，不受Spring管理。
+
+
+
+    　　以下为摘自Spring的文档：
+
+        Proxy for a standard Servlet Filter, delegating to a Spring-managed bean that implements the Filter interface.
+        Supports a "targetBeanName" filter init-param in web.xml, specifying the name of the target bean in the Spring application context.
+
+        web.xml will usually contain a DelegatingFilterProxy definition, with the specified filter-name corresponding
+        to a bean name in Spring's root application context. All calls to the filter proxy will then be delegated to
+        that bean in the Spring context, which is required to implement the standard Servlet Filter interface.
+
+        This approach is particularly useful for Filter implementation with complex setup needs, allowing to apply the
+        full Spring bean definition machinery to Filter instances. Alternatively, consider standard Filter setup in
+        combination with looking up service beans from the Spring root application context.
+
+        NOTE: The lifecycle methods defined by the Servlet Filter interface will by default not be delegated
+        to the target bean, relying on the Spring application context to manage the lifecycle of that bean.
+        Specifying the "targetFilterLifecycle" filter init-param as "true" will enforce invocation of the Filter.
+        init and Filter.destroy lifecycle methods on the target bean, letting the servlet container manage the filter lifecycle.
+
+
+

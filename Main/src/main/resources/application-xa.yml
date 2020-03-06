@@ -1,0 +1,192 @@
+
+kkincegration:
+  jta:
+    atomikos:
+      # com.kkIntegration.mysql.properties.XAType
+      # xaType: MysqlXA
+      xaType: DruidXA
+      datasourceList:
+#          # 唯一的 Bean 名称
+#        - beanName: officeDataSource
+#          # 不要 / 开头 ，默认会自动添加前缀 classpath*:  注意： 路径需要唯一
+#          mapperPath: mapper/oauth/*.xml
+#          #  是 DAO 接口对应 mapper 的 包路径 ， 可以多个  , 分割 中间不要空格
+#          daoPackages: com.kkIntegration.ossd.dao.oauth
+#          #unique-resource-name: spring
+#          maxPoolSize: 25
+#          minPoolSize: 3
+#          maxLifetime: 20000
+#          borrowConnectionTimeout: 10000
+#          loginTimeout: 30
+#          maintenanceInterval: 60
+#          maxIdleTime: 60
+#          testQuery: select 1
+#          xaDataSourceClassName: com.alibaba.druid.pool.xa.DruidXADataSource
+#          xaProperties:
+#            username: root
+#            password: root
+#            urls:
+#              - url: jdbc:mysql://127.0.0.1:3306/office?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&serverTimezone=GMT%2B8&useSSL=false
+#                sourceName: officeNameWriter
+#              - url: jdbc:mysql://127.0.0.1:3306/osbr?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&serverTimezone=GMT%2B8&useSSL=false
+#                sourceName: osbrNameWriter
+#            driverClassName: com.mysql.cj.jdbc.Driver
+#            defaultAutoCommit: false
+#            # 初始化大小，最小，最大
+#            initialSize: 10
+#            minIdle: 20
+#            maxActive: 100
+#            # 配置获取连接等待超时的时间
+#            maxWait: 60000
+#            # 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
+#            timeBetweenEvictionRunsMillis: 60000
+#            # 配置一个连接在池中最小生存的时间，单位是毫秒
+#            minEvictableIdleTimeMillis: 300000
+#            testWhileIdle: true
+#            testOnBorrow: false
+#            testOnReturn: false
+#            # 打开PSCache，并且指定每个连接上PSCache的大小
+#            poolPreparedStatements: true
+#            maxPoolPreparedStatementPerConnectionSize: 20
+#            # 配置监控统计拦截的filters，去掉后监控界面sql无法统计，'wall'用于防火墙
+#            filters: stat,slf4j,wall
+#
+
+        - beanName: osbrDataSource
+          mapperPath: mapper/*/*.xml
+          # com.kkIntegration.ossd.dao.role,com.kkIntegration.ossd.dao.user,com.kkIntegration.ossd.dao.oauth
+          # com.kkIntegration.ossd.dao.role,com.kkIntegration.ossd.dao.user,com.kkIntegration.ossd.dao.oauth,com.kkIntegration.rbe.dao.table
+          daoPackages: com.kkIntegration.ossd.dao,com.kkIntegration.rbe.dao
+          maxPoolSize: 25
+          minPoolSize: 3
+          maxLifetime: 20000
+          borrowConnectionTimeout: 10000
+          loginTimeout: 30
+          maintenanceInterval: 60
+          maxIdleTime: 60
+          testQuery: select 1
+          xaDataSourceClassName: com.alibaba.druid.pool.xa.DruidXADataSource
+          xaProperties:
+            username: root
+            password: root
+            urls:
+              - url: jdbc:mysql://127.0.0.1:3306/osbr?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&serverTimezone=GMT%2B8&useSSL=false
+                sourceName: osbrReaderWriter
+
+            driverClassName: com.mysql.cj.jdbc.Driver
+            defaultAutoCommit: false
+            # 初始化大小，最小，最大
+            initialSize: 10
+            minIdle: 20
+            maxActive: 100
+            # 配置获取连接等待超时的时间
+            maxWait: 60000
+            # 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
+            timeBetweenEvictionRunsMillis: 60000
+            # 配置一个连接在池中最小生存的时间，单位是毫秒
+            minEvictableIdleTimeMillis: 300000
+            testWhileIdle: true
+            testOnBorrow: false
+            testOnReturn: false
+            # 打开PSCache，并且指定每个连接上PSCache的大小
+            poolPreparedStatements: true
+            maxPoolPreparedStatementPerConnectionSize: 20
+            # 配置监控统计拦截的filters，去掉后监控界面sql无法统计，'wall'用于防火墙
+            filters: stat,slf4j,wall
+
+
+
+#kkincegration:
+#  jta:
+#    atomikos:
+#      # com.kkIntegration.mysql.properties.XAType
+#      # xaType: MysqlXA
+#      xaType: DruidXA
+#      datasourceList:
+#        # 唯一的 Bean 名称
+#        - beanName: nameWriterDataSource
+#          # 不要 / 开头 ，默认会自动添加前缀 classpath*:  注意： 路径需要唯一
+#          mapperPath: mapper/name/writer/*.xml
+#          #  是 DAO 接口对应 mapper 的 包路径 ， 可以多个  , 分割 中间不要空格
+#          daoPackages: com.kkIntegration.ossd.dao.oauth
+#          #unique-resource-name: spring
+#          maxPoolSize: 25
+#          minPoolSize: 3
+#          maxLifetime: 20000
+#          borrowConnectionTimeout: 10000
+#          loginTimeout: 30
+#          maintenanceInterval: 60
+#          maxIdleTime: 60
+#          testQuery: select 1
+#          xaDataSourceClassName: com.alibaba.druid.pool.xa.DruidXADataSource
+#          xaProperties:
+#            username: root
+#            password: root
+#            urls:
+#              - url: jdbc:mysql://127.0.0.1:3306/office?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&serverTimezone=GMT%2B8&useSSL=false
+#                sourceName: officeNameWriter
+#              - url: jdbc:mysql://127.0.0.1:3306/osbr?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&serverTimezone=GMT%2B8&useSSL=false
+#                sourceName: osbrNameWriter
+#            driverClassName: com.mysql.cj.jdbc.Driver
+#            defaultAutoCommit: false
+#            # 初始化大小，最小，最大
+#            initialSize: 1
+#            minIdle: 20
+#            maxActive: 100
+#            # 配置获取连接等待超时的时间
+#            maxWait: 60000
+#            # 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
+#            timeBetweenEvictionRunsMillis: 60000
+#            # 配置一个连接在池中最小生存的时间，单位是毫秒
+#            minEvictableIdleTimeMillis: 300000
+#            testWhileIdle: true
+#            testOnBorrow: false
+#            testOnReturn: false
+#            # 打开PSCache，并且指定每个连接上PSCache的大小
+#            poolPreparedStatements: true
+#            maxPoolPreparedStatementPerConnectionSize: 20
+#            # 配置监控统计拦截的filters，去掉后监控界面sql无法统计，'wall'用于防火墙
+#            filters: stat,slf4j,wall
+#
+#
+#        - beanName: osbrDataSource
+#          mapperPath: mapper/osbr/*/*.xml
+#          daoPackages: com.kkIntegration.ossd.dao.role,com.kkIntegration.ossd.dao.user
+#          maxPoolSize: 25
+#          minPoolSize: 3
+#          maxLifetime: 20000
+#          borrowConnectionTimeout: 10000
+#          loginTimeout: 30
+#          maintenanceInterval: 60
+#          maxIdleTime: 60
+#          testQuery: select 1
+#          xaDataSourceClassName: com.alibaba.druid.pool.xa.DruidXADataSource
+#          xaProperties:
+#            username: root
+#            password: root
+#            urls:
+#              - url: jdbc:mysql://127.0.0.1:3306/osbr?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&serverTimezone=GMT%2B8&useSSL=false
+#                sourceName: osbrReaderWriter
+#            driverClassName: com.mysql.cj.jdbc.Driver
+#            defaultAutoCommit: false
+#            # 初始化大小，最小，最大
+#            initialSize: 1
+#            minIdle: 20
+#            maxActive: 100
+#            # 配置获取连接等待超时的时间
+#            maxWait: 60000
+#            # 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
+#            timeBetweenEvictionRunsMillis: 60000
+#            # 配置一个连接在池中最小生存的时间，单位是毫秒
+#            minEvictableIdleTimeMillis: 300000
+#            testWhileIdle: true
+#            testOnBorrow: false
+#            testOnReturn: false
+#            # 打开PSCache，并且指定每个连接上PSCache的大小
+#            poolPreparedStatements: true
+#            maxPoolPreparedStatementPerConnectionSize: 20
+#            # 配置监控统计拦截的filters，去掉后监控界面sql无法统计，'wall'用于防火墙
+#            filters: stat,slf4j,wall
+#
+#
+

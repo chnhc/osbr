@@ -1,0 +1,41 @@
+
+
+GlobalMethodSecurityConfiguration
+
+启动加载流程
+    Spring Security启动加载流程分析
+    Spring Security启动加载流程梳理.html
+    https://blog.csdn.net/barlay/article/details/86625331
+
+
+Security 原理分析 ：
+    Spring Security 工作原理概览.html
+    https://blog.csdn.net/u012702547/article/details/89629415
+
+授权管理和投票机制 ：
+    话说Spring Security权限管理.html
+    https://www.cnblogs.com/dongying/p/6106855.html
+
+鉴权过滤器Interceptor ：
+    Spring Security详解（四）认证之鉴权.html
+    https://blog.csdn.net/sinat_29899265/article/details/80771330
+
+FilterSecurityInterceptor 使用：
+    spring boot security FilterSecurityInterceptor 使用要点记录.html
+    https://blog.csdn.net/qushapos/article/details/84940810
+
+全面介绍 ：
+    Spring Security 案例实现和执行流程剖析.html
+    https://www.cnblogs.com/xifengxiaoma/p/10020960.html
+
+
+代码走读 ：
+    Spring Security原理篇(一) 启动原理.html
+    Spring Security原理篇(二) 过滤器原理 .html
+    Spring Security原理篇(三) HttpSecurity .html
+    Spring Security原理篇(四) FilterChainProxy.html
+    Spring Security原理篇(五) 默认过滤器.html
+    Spring Security原理篇(六)梳理一下再出发.html
+    Spring Security原理篇(七) 认证流程.html
+    https://www.jianshu.com/p/4fcdcf677371
+

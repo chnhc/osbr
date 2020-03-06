@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kkIntegration.ossd.dao.oauth.NameDAO" >
+
+
+    <select id="selectNameById" resultType="com.kkIntegration.ossd.entity.oauth.Name">
+
+        select * from name where id = '1'
+
+    </select>
+
+
+
+    <insert id="insertName"
+            parameterType="com.kkIntegration.ossd.entity.oauth.Name">
+      insert into name
+      (name)
+      values (#{name})
+    </insert>
+
+</mapper>

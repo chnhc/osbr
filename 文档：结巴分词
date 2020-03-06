@@ -1,0 +1,22 @@
+
+使用了 花瓣 重写的 java版本 结巴分词
+
+
+原理介绍：
+
+    tfidf算法原理参考：
+        TF-IDF理解及其Java实现.html
+        http://www.cnblogs.com/ywl925/p/3275878.html
+
+    部分实现思路参考jieba分词：https://github.com/fxsjy/jieba
+
+
+包介绍：
+
+    com.huaban.analysis.jieba.noWord 是没有 词性 模块
+    com.huaban.analysis.jieba.word 是包含 词性 模块
+
+    com.qianxinyao.analysis.jieba.keyword 是包含 词频 模块
+
+    com.chu163.jieba 是自己项目使用 结巴分词 进行QQ消息，关键信息提取
+

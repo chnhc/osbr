@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kkIntegration.ossd.dao.function.FunctionDAO" >
+
+    <!-- 表名 -->
+    <sql id="fun_table">`function`</sql>
+
+    <select id="selectAllFun" resultType="com.kkIntegration.ossd.entity.function.FunctionEntity">
+
+        SELECT id, fun_id, fun_name FROM <include refid="fun_table" />
+
+    </select>
+
+    <select id="selectFunLimit" resultType="com.kkIntegration.ossd.entity.function.FunctionEntity">
+
+        SELECT id, fun_id, fun_name FROM <include refid="fun_table" /> LIMIT #{form_size}, #{to_size}
+
+    </select>
+
+    <insert id="insertFun"
+            parameterType="com.kkIntegration.ossd.entity.function.FunctionEntity">
+
+        INSERT INTO <include refid="fun_table" />
+        (fun_id, fun_name)
+        VALUES
+        (#{fun_id}, #{fun_name});
+
+    </insert>
+
+    <update id="updateFunId">
+
+        UPDATE <include refid="fun_table" />
+        SET
+        fun_id = #{new_fun_id}
+        WHERE
+        id = #{id} AND fun_id = #{fun_id}
+    </update>
+
+
+    <update id="updateFunName">
+
+        UPDATE <include refid="fun_table" />
+        SET
+        fun_name = #{new_fun_name}
+        WHERE
+        id = #{id} AND fun_id = #{fun_id}
+    </update>
+
+    <update id="updateFun">
+
+        UPDATE <include refid="fun_table" />
+        SET
+        fun_name = #{new_fun_name} ,
+        fun_id = #{new_fun_id}
+        WHERE
+        id = #{id} AND fun_id = #{fun_id}
+    </update>
+
+
+    <delete id="deleteFun">
+
+        DELETE FROM <include refid="fun_table" />
+        WHERE
+        id = #{id} AND fun_id = #{fun_id}
+
+    </delete>
+
+    <select id="totalSize" resultType="java.lang.Integer">
+
+        SELECT COUNT(0) FROM <include refid="fun_table" />
+
+    </select>
+
+
+</mapper>

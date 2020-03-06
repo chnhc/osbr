@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.kkIntegration.rbe.dao.table.TableDAO" >
+
+
+
+    <insert id="addTableBatch">
+        INSERT INTO t_table(t_id,t_name)
+        VALUES
+        <foreach collection="tables" item="t" separator=",">
+            (#{t.t_id},#{t.t_name})
+        </foreach>
+    </insert>
+
+
+
+</mapper>

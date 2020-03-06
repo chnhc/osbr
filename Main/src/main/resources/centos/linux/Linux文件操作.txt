@@ -1,0 +1,49 @@
+
+如何创建出一个空文件
+     touch test.txt
+
+
+1、vi/vim  --- 用于编辑文件的命令
+    - 进入到编辑状态(插入模式) 按键盘上小写字母 i
+    - 按esc(退出编辑状态)
+        :wq     (write写/保存 quit 退出)
+        :q 	    (不保存直接退出)
+        :q! 	(不保存直接退出)
+        :w      (只保存但不退出)
+
+2、 将文件不用打开进行直接编辑
+    - 直接输出屏幕
+        echo "hello world"
+    - 保存文件中
+        echo "hello world" >  test.txt
+        echo "test hello 02" >>  test.txt
+        说明:
+            >  执行原理: 将原有文件内容先进行清空 添加新的信息
+        	>> 执行原理: 不会覆盖情况原文件内容,而是在原文件最后一行追加新的信息
+
+3、 查看文件内容的命令
+     cat test.txt
+
+4、 如何复制保存数据
+    cp 要复制数据信息(文件/目录) 复制到什么位置(目录中)
+    cp -r /data/test /tmp
+        将 /test/ 一同复制到/tmp 目录下
+        如果文件存在，则需要输入 y 进行确认覆盖
+    \cp -r /data/test/ /tmp/
+        进行目录中数据强行覆盖, 不需要输入 y
+
+5、删除数据命令(慎用)
+     rm /data/test/test.txt         需要输入 y 确认删除
+     \rm /data/test/test.txt        可强制删除
+     rm -f /data/test/test.txt      直接删除文件
+     rm -rf /data/test/             直接删除目录
+
+注意：避免删除根目录 rm -rf *
+
+
+6、移动数据信息(剪切)
+    mv
+
+
+
+

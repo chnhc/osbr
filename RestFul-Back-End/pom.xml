@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>osbr</artifactId>
+        <groupId>com.kkIntegration</groupId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>RestFul-Back-End</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+
+    <description>后台接口模块</description>
+
+
+    <dependencies>
+
+
+        <!-- Echarts 图表 -->
+        <dependency>
+            <groupId>com.kkIntegration</groupId>
+            <artifactId>Echarts</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
+        <!-- mysql 数据库 -->
+        <dependency>
+            <groupId>com.kkIntegration</groupId>
+            <artifactId>Mysql</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
+        <!-- OAuth2 存储数据库 -->
+        <dependency>
+            <groupId>com.kkIntegration</groupId>
+            <artifactId>OAuth2-Security-Service-Dao</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
+
+        <!-- Security 用户权限 -->
+        <dependency>
+            <groupId>com.kkIntegration</groupId>
+            <artifactId>Security</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
+
+        <!--OAuth2Resource 资源拦截-->
+        <dependency>
+            <groupId>com.kkIntegration</groupId>
+            <artifactId>OAuth2-Resource</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
+
+        <!-- OAuth2Resource 认证服务器 -->
+        <dependency>
+            <groupId>com.kkIntegration</groupId>
+            <artifactId>OAuth2-Server</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
+
+        <!-- jieba 分析器 -->
+<!--        <dependency>
+            <groupId>com.kkIntegration</groupId>
+            <artifactId>jieba</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>-->
+
+
+        <!-- 移除之后会报错，加入下面的依赖-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-tomcat</artifactId>
+            <!--打包的时候可以不用包进去，别的设施会提供。事实上该依赖理论上可以参与编译，测试，运行等周期。
+                相当于compile，但是打包阶段做了exclude操作-->
+            <scope>compile</scope>
+        </dependency>
+
+
+        <!-- spring boot restful web -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <exclusions>
+                <!-- 去除旧log依赖
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-logging</artifactId>
+                </exclusion>-->
+                <!-- 移除嵌入式tomcat插件-->
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-tomcat</artifactId>
+                </exclusion>
+
+            </exclusions>
+        </dependency>
+
+
+        <!-- 接口编译处理 -->
+        <dependency>
+            <groupId>com.kkIntegration</groupId>
+            <artifactId>Processor</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
+
+
+    </dependencies>
+
+    <build>
+
+        <resources>
+            <resource>
+                <directory>src/main/java</directory>
+                <includes>
+                    <include>**/*.xml</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>**.*</include>
+                    <include>**/*.*</include>
+                    <include>**/*/*.*</include>
+                </includes>
+            </resource>
+        </resources>
+    </build>
+
+</project>

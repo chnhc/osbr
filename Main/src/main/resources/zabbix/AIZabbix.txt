@@ -1,0 +1,155 @@
+
+
+综合架构监控服务体系结构:
+    1) 硬件监控		服务器 路由器 交换机 防火墙(SNMP)
+    2) 系统监控     CPU 内存 磁盘 网络 进程 TCP(十一种状态)
+    3) 服务监控     nginx php tomcat redis memcache mysql
+    4) 网站监控     请求时间 响应时间 加载时间 页面监控
+    5) 日志监控     ELK（收集 存储 分析 展示） 日志易
+	   access  --- 用户源IP地址  北京1000 上海100 深圳500
+    6) 安全监控     Firewalld(4层和4层以上)  WAF（Nginx+lua）(应用层面) 安全宝  牛盾云 安全狗
+    7) 网络监控     smokeping 监控宝 站长工具  奇云测  多机房
+    8) 业务监控     (数据库信息)活动产生多少流量  产生多少注册量  带来多少价值
+
+
+
+1、zabbix软件结构组成
+    zabbix-server:	监控服务端
+    zabbix-agent:	监控客户端
+    zabbix-web:		监控网站服务
+    php:			处理动态请求
+    mysql:			数据库存储监控数据
+    zabbix-proxy:	负责收集agent信息汇总告知zabbix-server
+
+2、zabbix软件安装部署过程
+  	软件选择: 4.0 LTS(long time support 长期支持版)
+
+  	zabbix服务端部署软件流程:
+  	1、 下载安装zabbix yum 源文件
+            LTS long time support
+            1) aliyun zabbix yum 源
+            2) 清华源
+            rpm -ivh https://mirrors.tuna.tsinghua.edu.cn/zabbix/zabbix/4.0/rhel/7/x86_64/zabbix-release-4.0-1.el7.noarch.rpm
+            rpm -ivh https://mirrors.tuna.tsinghua.edu.cn/zabbix/zabbix/3.4/rhel/7/x86_64/zabbix-release-4.0-1.el7.noarch.rpm  -- 老版本
+
+    2、下载安装zabbix服务端相关软件
+            zabbix服务程序软件: zabbix-server-mysql
+            zabbix服务web软件: zabbix-web-mysql httpd php
+            数据库服务软件: mariadb-server
+            yum install -y zabbix-server-mysql zabbix-web-mysql httpd php mariadb-server zabbix-agent
+
+    3、软件配置
+            vim /etc/zabbix/zabbix_server.conf
+            126   DBPassword=zabbix
+            vim /etc/httpd/conf.d/zabbix.conf
+            21    php_value date.timezone Asia/Shanghai
+
+    4、编写配置数据库服务
+            systemctl start mariadb.service
+            systemctl status mariadb.service
+            mysqladmin password 123456
+            mysql -uroot -p123456
+            创建zabbix数据库--zabbix
+            create database zabbix character set utf8 collate utf8_bin;
+            创建数据库管理用户
+            grant all privileges on zabbix.* to zabbix@localhost identified by 'zabbix';
+            flush privileges;
+            在zabbix数据库中导入相应的表信息
+            zcat /usr/share/doc/zabbix-server-mysql-4.0.0/create.sql.gz|mysql -uzabbix -pzabbix zabbix
+            #zgrep
+
+    5、启动zabbix程序相关服务
+            数据库服务 zabbix服务 httpd服务
+            systemctl start zabbix-server.service httpd mariadb.service
+            systemctl enable zabbix-server.service httpd mariadb.service
+            说明: 至此zabbix-server命令行操作结束
+            LNMP: nginx php mysql
+            LAMP: apache(php模块) mysql
+
+    6、登录zabbix服务端web界面, 进行初始化配置
+            http://10.0.0.71/zabbix/setup.php
+            10051  zabbix-server 服务端端口号
+            10050  zabbix-agent  客户端端口号
+            /etc/zabbix/web/zabbix.conf.php   -- 记录web页面初始化信息
+
+    7、登录zabbix服务web页面
+            先配置
+            http://192.168.232.129/zabbix/setup.php
+            后登陆
+            用户名 Admin 密码 zabbix
+            http://192.168.232.129/zabbix
+
+    8、中文乱码问题
+            安装字体并替换现有字体
+            [root@m01 ~]# yum install wqy-microhei-fonts -y
+            [root@m01 ~]# cp /usr/share/fonts/wqy-microhei/wqy-microhei.ttc /usr/share/zabbix/assets/fonts/graphfont.ttf
+
+
+    监控客户端部署流程：
+    1、下载安装zabbix yum 源文件
+            LTS long time support
+            1) aliyun zabbix yum 源
+            2) 清华源
+            rpm -ivh https://mirrors.tuna.tsinghua.edu.cn/zabbix/zabbix/4.0/rhel/7/x86_64/zabbix-release-4.0-1.el7.noarch.rpm
+
+    2、下载安装zabbix客户端软件
+            yum install -y zabbix-agent
+             或者
+            rpm -ivh https://mirrors.tuna.tsinghua.edu.cn/zabbix/zabbix/4.0/rhel/7/x86_64/zabbix-agent-4.0.0-2.el7.x86_64.rpm
+
+    3、编写zabbix客户端配置文件
+            vim /etc/zabbix/zabbix_agentd.conf
+            98 Server=192.168.232.129
+
+            [root@web01 ~]# grep "^[a-Z]" /etc/zabbix/zabbix_agentd.conf
+            PidFile=/var/run/zabbix/zabbix_agentd.pid
+            LogFile=/var/log/zabbix/zabbix_agentd.log
+            LogFileSize=0
+            Server=192.168.232.129
+            ServerActive=127.0.0.1
+            Hostname=Zabbix server
+            Include=/etc/zabbix/zabbix_agentd.d/*.conf
+
+
+    4、启动zabbix-agent服务
+            [root@web01 ~]# systemctl start zabbix-agent
+            [root@web01 ~]# netstat -lntup|grep 10050
+            tcp      0     0 0.0.0.0:10050           0.0.0.0:*            LISTEN      4509/zabbix_agentd
+            tcp      0     0 :::10050                :::*                 LISTEN      4509/zabbix_agentd
+
+
+--------------------------
+1、netstat -ant
+    state状态：
+        LISTEN：侦听来自远方的TCP端口的连接请求
+        SYN-SENT：再发送连接请求后等待匹配的连接请求（如果有大量这样的状态包，检查是否中招了）
+        SYN-RECEIVED：再收到和发送一个连接请求后等待对方对连接请求的确认（如有大量此状态，估计被flood攻击了）
+        ESTABLISHED：代表一个打开的连接
+        FIN-WAIT-1：等待远程TCP连接中断请求，或先前的连接中断请求的确认
+        FIN-WAIT-2：从远程TCP等待连接中断请求
+        CLOSE-WAIT：等待从本地用户发来的连接中断请求
+        CLOSING：等待远程TCP对连接中断的确认
+        LAST-ACK：等待原来的发向远程TCP的连接中断请求的确认（不是什么好东西，此项出现，检查是否被攻击）
+        TIME-WAIT：等待足够的时间以确保远程TCP接收到连接中断请求的确认
+        CLOSED：没有任何连接状态
+
+2、自定义监控主机TCP 11种状态
+    查看：
+        [root@web01 ~]# netstat -ant|grep -c TIME_WAIT
+        55
+        [root@web01 ~]# netstat -ant|grep -c LISTEN
+        12
+
+    编写zabbix监控文件(传参形式)
+        [root@web01 ~]# cat /etc/zabbix/zabbix_agentd.d/tcp_status.conf
+        UserParameter=tcp_state[*],netstat -ant|grep -c $1
+        [root@web01 ~]# systemctl restart zabbix-agent.service
+
+    server端进行测试
+        [root@m01 ~]# rpm -ivh https://mirrors.tuna.tsinghua.edu.cn/zabbix/zabbix/4.0/rhel/7/x86_64/zabbix-release-4.0-1.el7.noarch.rpm
+        [root@m01 ~]# yum install zabbix-get.x86_64 -y
+        [root@m01 ~]# zabbix_get -s 192.168.232.125 -k tcp_state[TIME_WAIT]
+        51
+        [root@m01 ~]# zabbix_get -s 192.168.232.125 -k tcp_state[LISTEN]
+        12
+

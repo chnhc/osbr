@@ -1,0 +1,15 @@
+server:
+  #端口号
+  port: 9801
+  # 统一入口
+  servlet:
+    context-path: "/dbe"
+
+kkincegration:
+  security:
+    # 是否是后台
+    openBackEnd: true
+
+
+
+

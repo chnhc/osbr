@@ -1,0 +1,51 @@
+
+1、 安装软件
+    yum install -y inotify-tools
+
+2、 熟悉命令的使用
+    /usr/bin/inotifywait    --- 监控目录数据信息变化
+    /usr/bin/inotifywatch   --- 对监控的变化信息进行统计
+
+3、inotifywait命令使用方法：
+    inotifywait [参数]  监控的目录
+        -m|--monitor   --- 实现一直监控目录的数据变化
+        -r|--recursive --- 进行递归监控
+        -q|--quiet     --- 尽量减少信息的输出
+        --format <fmt> --- 指定输出信息的格式
+        --timefmt      --- 指定输出的时间信息格式
+        -e|--event     --- 指定监控的事件信息
+
+
+       创建文件监控信息输出
+           /data/ CREATE user13     --- 一个文件被创建
+           /data/ OPEN user13       --- 打开创建的文件
+           /data/ ATTRIB user13     --- 修改文件的属性信息
+           /data/ CLOSE_WRITE,CLOSE user13  --- 保存关闭一个文件
+
+	   删除文件监控信息输出
+	        /data/ DELETE user13
+
+	   修改文件监控信息输出
+           /data/ CREATE user10
+           /data/ OPEN user10
+           /data/ MODIFY user10
+           /data/ CLOSE_WRITE,CLOSE user10
+
+	   sed命令修改文件原理
+           /data/ OPEN user10          --- 打开文件
+           /data/ CREATE sedpSAFR7     --- 创建出一个临时文件（内存）
+           /data/ OPEN sedpSAFR7       --- 临时文件进行打开
+           /data/ ACCESS user10        --- 读取源文件内容
+           /data/ MODIFY sedpSAFR7     --- 修改临时文件
+           /data/ ATTRIB sedpSAFR7     --- 临时文件属性变化
+           /data/ CLOSE_NOWRITE,CLOSE user10   --- 不编辑直接关闭源文件
+           /data/ CLOSE_WRITE,CLOSE sedpSAFR7  --- 写入关闭临时文件
+           /data/ MOVED_FROM sedpSAFR7 --- 将临时文件移除
+           /data/ MOVED_TO user10      --- 移入一个新的user10源文件
+
+	   inotify监控命令格式：
+           inotifywait -mrq --timefmt "%F" --format "%T %w %f 事件信息:%e" /data -e CREATE
+           create创建、delete删除、moved_to移入、close_write修改
+
+4、企业应用：防止系统重要文件被破坏
+    需要用到inotify进行实时一直监控文件或目录 /etc /etc/passwd  /var/spool/cron/root

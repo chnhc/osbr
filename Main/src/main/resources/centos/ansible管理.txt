@@ -1,0 +1,888 @@
+1、基于秘钥的连接部署方式
+       第一个历程: 创建秘钥对(管理端服务器)
+	   ssh-keygen -t 秘钥的类型(dsa|rsa)
+	   第二个历程: 将公钥进行分发(被管理端服务器)
+       ssh-copy-id -i /root/.ssh/id_dsa.pub root@172.16.1.31
+       如何批量分发公钥:
+	   01. 需要输入连接确认信息 yes/no
+	   ssh-copy-id -i /root/.ssh/id_dsa.pub root@172.16.1.31 "-o StrictHostKeyChecking=no"
+	   02. 需要第一次连接输入密码
+	   yum install -y sshpass
+	   sshpass -proot ssh-copy-id -i /root/.ssh/id_dsa.pub root@192.168.232.126 "-o StrictHostKeyChecking=no"
+	   03. 远程服务器SSH服务端口号改动了
+	   sshpass -p123456 ssh-copy-id -i /root/.ssh/id_dsa.pub root@172.16.1.31 -p 52113 "-o StrictHostKeyChecking=no"
+
+
+2、分发公钥脚本:
+	[root@m01 scripts]# vim fenfa_pub_key.sh
+    #!/bin/bash
+
+    for ip in {1..100}
+    do
+      echo "==================== host 172.16.1.$ip pub-key start fenfa ==================== "
+      sshpass -p123456 ssh-copy-id -i /root/.ssh/id_dsa.pub root@172.16.1.$ip "-o StrictHostKeyChecking=no" &>/dev/null
+      echo -e "host 172.16.1.$ip fenfa success."
+      echo "==================== host 172.16.1.$ip fenfa end ==================== "
+      echo ""
+    done
+
+3、分发公钥检查脚本(批量管理脚本)  --- 串型批量管理
+    [root@m01 scripts]# cat check_pub_key.sh
+    #!/bin/bash
+    CMD=$1
+    for ip in {7,31,41}
+    do
+      echo "==================== host 172.16.1.$ip check ==================== "
+      ssh 172.16.1.$ip $CMD
+      echo ""
+    done
+
+4、SSH服务配置文件
+    /etc/ssh/sshd_config
+	Port 22                   --- 修改服务端口信息
+	ListenAddress 0.0.0.0     --- 监听地址 指定一块网卡能够接受远程访问请求  *****
+	                              PS: 指定监听地址只能是本地网卡上有的地址
+	PermitEmptyPasswords no   --- 是否允许远程用户使用空密码登录,默认不允许
+	PermitRootLogin yes       --- 是否禁止root用户远程连接主机 建议改为no
+	GSSAPIAuthentication no   --- 是否开启GSSAPI认证功能 不用的时候关闭
+	UseDNS no                 --- 是否开启反向DNS解析功能 建议进行关闭
+
+
+5、SSH远程服务防范入侵的案例
+    1. 用密钥登录，不用密码登陆
+	2、牤牛阵法：解决SSH安全问题
+	   a.防火墙封闭SSH,指定源IP限制(局域网、信任公网)
+       b.开启SSH只监听本地内网IP（ListenAddress 172.16.1.61）。
+    3、尽量不给服务器外网IP
+    4、最小化（软件安装-授权）
+    5、给系统的重要文件或命令做一个指纹
+	   /etc/passwd md5sum 11110000aaaabbbb   监控
+	   inotify /bin                          监控
+    6、给他锁上 chattr +i
+
+
+########## 安装 ansible
+
+1、安装部署软件
+    yum install -y ansible     --- 需要依赖epel的yum源
+    /etc/ansible/ansible.cfg   --- ansible服务配置文件
+    /etc/ansible/hosts         --- 主机清单文件   定义可以管理的主机信息
+    /etc/ansible/roles         --- 角色目录???
+
+2、需要编写主机清单文件
+    vim /etc/ansible/hosts
+
+3、测试是否可以管理多个主机
+    ansible all -a "hostname"
+
+
+########## 模块
+
+4、ansible官方网站: https://docs.ansible.com/
+	模块的应用语法格式:
+	ansible 主机名称/主机组名称/主机地址信息/all  -m(指定应用的模块信息)  模块名称  -a(指定动作信息)  "执行什么动作"
+
+	命令类型模块:
+	掌握第一个模块: command (默认模块)
+	command – Executes a command on a remote node
+	          在一个远程主机上执行一个命令
+	简单用法:
+	[root@m01 scripts]# ansible 172.16.1.31 -m command -a "hostname"
+
+    扩展应用:
+        1) chdir  	Change into this directory before running the command.
+                  在执行命令之前对目录进行切换
+           ansible 172.16.1.31 -m command -a "chdir=/tmp touch oldboy.txt"
+
+        2) creates	If it already exists, this step won't be run.
+                    如果文件存在了,不执行命令操作
+           ansible 172.16.1.31 -m command -a "creates=/tmp/hosts touch oldboy.txt"
+
+        3) removes	If it already exists, this step will be run.
+                    如果文件存在了,	这个步骤将执行
+           ansible 172.16.1.31 -m command -a "removes=/tmp/hosts chdir=/tmp touch oldboy.txt"
+        4) free_form(required)
+           The command module takes a free form command to run.
+           There is no parameter actually named 'free form'. See the examples!
+           使用command模块的时候,-a参数后面必须写上一个合法linux命令信息
+
+        注意事项:
+        有些符号信息无法识别:  <", ">", "|", ";" and "&"
+
+
+5、将所有模块进行了讲解说明
+  	   command	模块: 	在远程主机上执行命令操作   默认模块
+  	   shell	模块:  	在远程主机上执行命令操作   万能模块
+  	   PS: 有时剧本不能反复执行!!!
+  	   script	模块: 	批量执行本地脚本
+  	   copy		模块:	用于批量分发传输数据信息
+  	   fetch	模块:	用于将远程主机数据进行拉取到本地管理主机
+  	   file		模块: 	修改数据属性信息/创建数据信息
+  	   yum		模块:	用于安装和卸载软件包
+  	   service	模块:	用于管理服务的运行状态
+       user		模块:	用于批量创建用户并设置密码信息
+  	   mount	模块:	用于批量挂载操作
+  	   cron		模块: 	批量部署定时任务信息
+  	   ping		模块:	远程管理测试模块
+
+
+6、掌握第二个模块: shell (万能模块)
+    	shell   – Execute commands in nodes
+    	          在节点上执行操作
+    	简单用法:
+    	[root@m01 scripts]# ansible 172.16.1.31 -m command -a "hostname"
+        172.16.1.31 | CHANGED | rc=0 >>
+        nfs01
+
+        扩展应用:
+    	1) chdir  	Change into this directory before running the command.
+    	          在执行命令之前对目录进行切换
+    	   ansible 172.16.1.31 -m command -a "chdir=/tmp touch oldboy.txt"
+
+        2) creates	If it already exists, this step won't be run.
+    	            如果文件存在了,不执行命令操作
+           ansible 172.16.1.31 -m command -a "creates=/tmp/hosts touch oldboy.txt"
+
+        3) removes	If it already exists, this step will be run.
+                    如果文件存在了,	这个步骤将执行
+    	   ansible 172.16.1.31 -m command -a "removes=/tmp/hosts chdir=/tmp touch oldboy.txt"
+        4) free_form(required)
+           The command module takes a free form command to run.
+    	   There is no parameter actually named 'free form'. See the examples!
+    	   使用command模块的时候,-a参数后面必须写上一个合法linux命令信息
+
+7、实践应用: 利用shell执行脚本
+        第一个步骤: 编写一个脚本
+        第二个步骤: 将脚本发送到远程主机
+        第三个步骤: 将脚本权限进行修改(添加执行权限)
+    	第四个步骤: 运行ansible命令执行脚本
+
+8、掌握第三个模块: script (万能模块)
+    	第一个步骤: 编写一个脚本
+        第二个步骤: 运行ansible命令执行脚本
+
+        PS: scripts模块参数功能和command模块类似
+
+9、文件类型模块:
+    	copy – Copies files to remote locations
+    	       将数据信息进行批量分发
+
+    	基本用法:
+    	ansible 172.16.1.31 -m copy -a "src=/etc/hosts dest=/etc/"
+        172.16.1.31 | CHANGED => {       --- 对哪台主机进行操作
+            "changed": true,             --- 是否对主机信息进行改变
+            "checksum": "6ed7f68a1d6b4b36c1418338b2001e421eeba270",    --- 生成一个文件校验码==MD5数值
+            "dest": "/etc/hosts",        --- 显示目标路径信息
+            "gid": 0,                    --- 显示复制后文件gid信息
+            "group": "root",             --- 显示复制后文件属组信息
+            "md5sum": "7afd7b74854f0aaab646b3e932f427c0",              --- 生成一个文件校验码==MD5数值
+            "mode": "0644",              --- 显示复制后文件权限信息
+            "owner": "root",             --- 显示复制后文件属主信息
+            "size": 401,                 --- 显示文件的大小信息
+            "src": "/root/.ansible/tmp/ansible-tmp-1557804498.23-26487341925325/source",
+            "state": "file",             --- 显示文件的类型信息
+            "uid": 0                     --- 显示复制后文件uid信息
+        }
+
+        补充说明: ansible软件输出颜色说明:
+    	01. 绿色信息:  查看主机信息/对主机未做改动
+    	02. 黄色信息:  对主机数据信息做了修改
+    	03. 红色信息:  命令执行出错了
+    	04. 粉色信息:  忠告信息
+    	05. 蓝色信息:  显示ansible命令执行的过程???
+
+    	扩展用法:
+    	01. 在传输文件时修改文件的属主和属组信息
+    	ansible 172.16.1.31 -m copy -a "src=/etc/ansible/file/rsync/rsync.password dest=/etc/ owner=oldboy group=oldboy"
+    	02. 在传输文件时修改文件的权限信息
+    	ansible 172.16.1.31 -m copy -a "src=/etc/ansible/file/rsync/rsync.password dest=/etc/ mode=1777"
+    	03. 在传输数据文件信息时对远程主机源文件进行备份
+    	ansible 172.16.1.31 -m copy -a "src=/etc/ansible/file/rsync/rsync.password dest=/etc/ backup=yes"
+        04. 创建一个文件并直接编辑文件的信息
+        ansible 172.16.1.31 -m copy -a "content='oldboy123' dest=/etc/rsync.password"
+
+        自行研究: remote_src  directory_mode local_follow
+    	If no, it will search for src at originating/master machine.
+    	       src参数指定文件信息,会在本地管理端服务进行查找
+        If yes it will go to the remote/target machine for the src. Default is no.
+    	       src参数指定文件信息,会从远程主机上进行查找
+
+        PS: ansible软件copy模块复制目录信息
+    	ansible 172.16.1.31 -m copy -a "src=/oldboy dest=/oldboy"
+    	src后面目录没有/: 将目录本身以及目录下面的内容都进行远程传输复制
+    	ansible 172.16.1.31 -m copy -a "src=/oldboy/ dest=/oldboy"
+    	src后面目录有/:   只将目录下面的内容都进行远程传输复制
+
+10、file – Sets attributes of files
+    	       设置文件属性信息
+
+    	基本用法:
+        ansible 172.16.1.31 -m file -a "dest=/etc/hosts owner=oldboy group=oldboy mode=666"
+
+    	扩展用法:
+    	1. 可以利用模块创建数据信息 (文件 目录 链接文件)
+    	state  参数
+        =absent    --- 缺席/删除数据信息
+        =directory --- 创建一个目录信息
+        =file      --- 检查创建的数据信息是否存在 绿色存在 红色不存在
+        =hard      --- 创建一个硬链接文件
+        =link      --- 创建一个软链接文件
+        =touch     --- 创建一个文件信息
+
+    	创建目录信息:
+    	ansible 172.16.1.31 -m file -a "dest=/oldboy/ state=directory"
+    	ansible 172.16.1.31 -m file -a "dest=/oldboy/oldboy01/oldboy02/ state=directory"
+        创建文件信息:
+    	ansible 172.16.1.31 -m file -a "dest=/oldboy/oldboy.txt state=touch"
+    	创建链接文件信息:
+    	ansible 172.16.1.31 -m file -a "src=/oldboy/oldboy.txt dest=/oldboy/oldboy_hard.txt state=hard"
+    	ansible 172.16.1.31 -m file -a "src=/oldboy/oldboy.txt dest=/oldboy/oldboy_link.txt state=link"
+
+    	2. 可以利用模块删除数据信息
+    	ansible 172.16.1.31 -m file -a "dest=/oldboy/oldboy.txt state=absent"
+    	ansible 172.16.1.31 -m file -a "dest=/oldboy/  state=absent"
+
+    	自行研究: recurse
+
+
+11、yum模块
+        name  --- 指定安装软件名称
+        state --- 指定是否安装软件
+                  installed   --- 安装软件
+                  present
+                  latest
+                  absent      --- 卸载软件
+                  removed
+        ansible 172.16.1.31 -m yum -a "name=iotop state=installed"
+
+12、service模块: 管理服务器的运行状态  停止 开启 重启
+        name:   --- 指定管理的服务名称
+        state:  --- 指定服务状态
+                    started   启动
+                    restarted 重启
+                    stopped   停止
+        enabled --- 指定服务是否开机自启动
+        ansible 172.16.1.31 -m service -a "name=nfs state=started enabled=yes"
+
+13、cron模块: 批量设置多个主机的定时任务信息
+        crontab -e
+        *   *  *  *  *  定时任务动作
+        分 时 日 月 周
+
+        minute:                # Minute when the job should run ( 0-59, *, */2, etc )
+                               设置分钟信息
+        hour:                  # Hour when the job should run ( 0-23, *, */2, etc )
+                               设置小时信息
+        day:                   # Day of the month the job should run ( 1-31, *, */2, etc )
+                               设置日期信息
+        month:                 # Month of the year the job should run ( 1-12, *, */2, etc )
+                               设置月份信息
+        weekday:               # Day of the week that the job should run ( 0-6 for Sunday-Saturday, *, etc )
+                               设置周信息
+
+        job                    用于定义定时任务需要干的事情
+
+        基本用法:
+        ansible 172.16.1.31 -m cron -a "minute=0 hour=2 job='/usr/sbin/ntpdate ntp1.aliyun.com >/dev/null 2>&1'"
+
+        扩展用法:
+        01. 给定时任务设置注释信息
+        ansible 172.16.1.31 -m cron -a "name='time sync' minute=0 hour=2 job='/usr/sbin/ntpdate ntp1.aliyun.com >/dev/null 2>&1'"
+
+        02. 如何删除指定定时任务
+        ansible 172.16.1.31 -m cron -a "name='time sync01' state=absent"
+        PS: ansible可以删除的定时任务,只能是ansible设置好的定时任务
+
+        03. 如何批量注释定时任务
+        ansible 172.16.1.31 -m cron -a "name='time sync' job='/usr/sbin/ntpdate ntp1.aliyun.com >/dev/null 2>&1' disabled=yes"
+
+14、mount: 批量进行挂载操作
+        src:  需要挂载的存储设备或文件信息
+        path: 指定目标挂载点目录
+        fstype: 指定挂载时的文件系统类型
+        state
+        present/mounted     --- 进行挂载
+        present: 不会实现立即挂载,修改fstab文件,实现开机自动挂载
+        mounted: 会实现立即挂载, 并且会修改fstab文件,实现开机自动挂载 *****
+
+        absent/unmounted    --- 进行卸载
+        absent:     会实现立即卸载, 并且会删除fstab文件信息,禁止开机自动挂载
+	       unmounted:  会实现立即卸载, 但是不会会删除fstab文件信息  *****
+
+15、user模块: 实现批量创建用户
+        基本用法:
+        ansible 172.16.1.31 -m user -a "name=oldboy01"
+
+        扩展用法:
+        1) 指定用户uid信息
+        ansible 172.16.1.31 -m user -a "name=oldboy02 uid=6666"
+
+        2) 指定用户组信息
+        ansible 172.16.1.31 -m user -a "name=oldboy03 group=oldboy02"
+        ansible 172.16.1.31 -m user -a "name=oldboy04 groups=oldboy02"
+
+        3) 批量创建虚拟用户
+        ansible 172.16.1.31 -m user -a "name=rsync create_home=no  shell=/sbin/nologin"
+
+        4) 给指定用户创建密码
+        PS: 利用ansible程序user模块设置用户密码信息,需要将密码明文信息转换为密文信息进行设置
+        生成密文密码信息方法:
+        方法一:
+        ansible all -i localhost, -m debug -a "msg={{ '密码信息123456' | password_hash('sha512', 'oldboy') }}"
+        [root@m01 tmp]# ansible all -i localhost, -m debug -a "msg={{ '123456' | password_hash('sha512', 'oldboy') }}"
+        localhost | SUCCESS => {
+          "msg": "$6$oldboy$MVd3DevkLcimrBLdMICrBY8HF82Wtau5cI8D2w4Zs6P1cCfMTcnnyAmmJc7mQaE9zuHxk8JFTRgYMGv9uKW7j1"
+        }
+
+        方法二:(忽略)
+        mkpasswd --method=sha-512
+
+        方法三:
+        yum install -y python-pip
+        pip install passlib
+        python -c "from passlib.hash import sha512_crypt; import getpass; print(sha512_crypt.using(rounds=5000).hash(getpass.getpass()))"
+        Password:
+        $6$rJJeiIerQ8p2eR82$uE2701X7vY44voF4j4tIQuUawmTNHEZhs26nKOL0z39LWyvIvZrHPM52Ivu9FgExlTFgz1VTOCSG7KhxJ9Tqk.
+
+        ansible 172.16.1.31 -m user -a 'name=oldboy08 password=$6$oldboy$MVd3DevkLcimrBLdMICrBY8HF82Wtau5cI8D2w4Zs6P1cCfMTcnnyAmmJc7mQaE9zuHxk8JFTRgYMGv9uKW7j1'
+
+
+####### 剧本编写
+
+1、剧本的编写方法
+    剧本的作用: 可以一键化完成多个任务
+	自动化部署rsync服务:
+	服务端的操作
+	第一个历程安装软件:
+	ansible 172.16.1.41 -m yum -a "name=rsync state=installed"
+
+	第二个历程编写文件:
+	ansible 172.16.1.41 -m copy -a "src=/xxx/rsyncd.conf dest=/etc/"
+
+	第三个历程创建用户
+	ansible 172.16.1.41 -m user -a "name=rsync create_home=no shell=/sbin/nologin"
+
+	第四个历程创建目录
+	ansible 172.16.1.41 -m file -a "dest=/backup state=directory owner=rsync group=rsync"
+
+	第五个历程创建密码文件
+	ansible 172.16.1.41 -m copy -a "content='rsync_backup:oldboy123' dest=/etc/rsync.password mode=600"
+
+	第六个历程启动服务
+	ansible 172.16.1.41 -m service -a "name=rsyncd state=started enabled=yes"
+
+	客户端的操作:
+	第一个历程: 创建密码文件
+	ansible 客户端地址 -m copy -a "content='rsync_backup:oldboy123' dest=/etc/rsync.password mode=600"
+
+
+2、开始编写剧本
+    mkdir /etc/ansible/ansible-playbook
+    vim rsync_server.ymal
+    说明: 剧本文件扩展名尽量写为yaml
+    1. 方便识别文件是一个剧本文件
+    2. 文件编写时会有颜色提示
+    - hosts: 172.16.1.41
+      tasks:
+        - name: 01-install rsync
+          yum: name=rsync state=installed
+        - name: 02-push conf file
+          copy: src=/tmp/rsyncd.conf dest=/etc/
+
+
+3、如何执行剧本:
+	第一个步骤: 检查剧本的语法格式
+	ansible-playbook --syntax-check  rsync_server.yaml
+    第二个步骤: 模拟执行剧本
+	ansible-playbook -C rsync_server.yaml
+	第三个步骤: 直接执行剧本
+	ansible-playbook rsync_server.yaml
+
+
+4、剧本编写常见错误:
+  	01. 剧本语法规范是否符合(空格 冒号 短横线)
+  	02. 剧本中模块使用是否正确
+  	03. 剧本中一个name标识下面只能写一个模块任务信息
+  	04. 剧本中尽量不要大量使用shell模块
+
+
+
+######## 主机清单
+
+1、如何配置主机清单
+
+    第一种方式: 分组配置主机信息
+	[web]
+    172.16.1.7
+    172.16.1.8
+    172.16.1.9
+
+    [data]
+    172.16.1.31
+    172.16.1.41
+	操作过程
+    [root@m01 ansible-playbook]# ansible data -a "hostname"
+    172.16.1.31 | CHANGED | rc=0 >>
+    nfs01
+
+    172.16.1.41 | CHANGED | rc=0 >>
+    backup
+
+    [root@m01 ansible-playbook]# ansible web -a "hostname"
+    172.16.1.7 | CHANGED | rc=0 >>
+    web01
+
+	第二种方式: 主机名符号匹配配置
+	[web]
+    172.16.1.[7:9]
+	[web]
+    web[01:03]
+
+	第三种方式: 跟上非标准远程端口
+	[web]
+    web01:52113
+    172.16.1.7:52113
+
+	第四种方式: 主机使用特殊的变量
+    [web]
+    172.16.1.7 ansible_ssh_port=52113 ansible_ssh_user=root ansible_ssh_pass=123456
+    [web]
+    web01 ansible_ssh_host=172.16.1.7 ansible_ssh_port=52113 ansible_ssh_user=root ansible_ssh_pass=123456
+
+    第五种方式: 主机组名嵌入配置
+	[rsync:children]    --- 嵌入子组信息
+    rsync_server
+    rsync_client
+
+    [rsync_server]
+    172.16.1.41
+
+    [rsync_client]
+    172.16.1.31
+    172.16.1.7
+
+	[web:vars]         --- 嵌入式变量信息
+    ansible_ssh_host=172.16.1.7
+    ansible_ssh_port=52113
+    ansible_ssh_user=root
+    ansible_ssh_pass=123456
+    [web]
+    web01
+
+    主机清单的配置方法:
+	https://docs.ansible.com/ansible/latest/user_guide/intro_inventory.html
+
+
+
+####### 剧本功能
+
+1、在剧本中设置变量信息
+    方式一：直接在剧本文件编写
+	vars:
+      oldboy01: data01
+      oldboy02: data02
+
+    方式二：在命令行中进行指定
+    ansible-playbook --extra-vars=oldboy01=data01
+
+    方式三：在主机清单文件编写
+    [oldboy]
+    oldboy01=data01
+    oldboy02=data02
+
+    三种变量设置方式都配置了,三种方式的优先级???
+	最优先: 命令行变量设置
+	次优先: 剧本中变量设置
+    最后:   主机清单变量设置
+
+	如何全局设置变量: roles 剧本整合
+
+
+2、 在剧本中设置注册信息
+    - hosts: oldboy
+      tasks:
+        - name: check server port
+          shell: netstat -lntup  --- 端口信息
+          register: get_server_port<--端口信息
+
+        - name: display port info
+          debug: msg={{ get_server_port.stdout_lines }}
+	显示进程信息,表示服务已经正常启动
+	PS: 设置变量不能有空格信息
+
+3、 在剧本中设置判断信息
+    如何指定判断条件:
+	(ansible_hostname == "nfs01")
+	(ansible_hostname == "web01")
+	setup模块中显示被管理主机系统的详细信息
+
+    - hosts: oldboy
+      remote_user: root
+      tasks:
+        - name: Check File
+          file: path=/tmp/this_is_{{ ansible_hostname }}_file state=touch
+          when: (ansible_hostname == "nfs") or (ansible_hostname == "backup")
+
+	    - name: install httpd
+		  yum: name=httpd state=installed
+		  when: (系统情况 == "CentOS")
+
+		- name: install httpd2
+          yum: name=httpd2 state=installed
+          when: (系统情况 == "ubuntu")
+
+	获取内置变量方法：
+	ansible oldboy -m setup -a "filter=ansible_hostname"
+    常见主机信息：
+    ansible_all_ipv4_addresses：				仅显示ipv4的信息。
+    ansible_devices：							仅显示磁盘设备信息。
+    ansible_distribution：						显示是什么系统，例：centos,suse等。
+    ansible_distribution_major_version：		显示是系统主版本。
+    ansible_distribution_version：				仅显示系统版本。
+    ansible_machine：							显示系统类型，例：32位，还是64位。
+    ansible_eth0：								仅显示eth0的信息。
+    ansible_hostname：							仅显示主机名。
+    ansible_kernel：							仅显示内核版本。
+    ansible_lvm：								显示lvm相关信息。
+    ansible_memtotal_mb：						显示系统总内存。
+    ansible_memfree_mb：						显示可用系统内存。
+    ansible_memory_mb：							详细显示内存情况。
+    ansible_swaptotal_mb：						显示总的swap内存。
+    ansible_swapfree_mb：						显示swap内存的可用内存。
+    ansible_mounts：							显示系统磁盘挂载情况。
+    ansible_processor：							显示cpu个数(具体显示每个cpu的型号)。
+    ansible_processor_vcpus：					显示cpu个数(只显示总的个数)。
+
+	获取子信息方法:
+	ansible_eth0[ipv4]
+
+4、 在剧本中设置循环信息
+    vim test04.yml
+    - hosts: all
+      remote_user: root
+      tasks:
+        - name: Add Users
+          user: name={{ item.name }} groups={{ item.groups }} state=present
+          with_items:
+    	    - { name: 'testuser1', groups: 'bin' }
+    		- { name: 'testuser2', groups: 'root' }
+
+    vim test05.yml
+    - hosts: all
+      remote_user: root
+      tasks:
+        - name: Installed Pkg
+          yum: name={{ item }}  state=present
+          with_items:
+    	    - wget
+    		- tree
+    		- lrzsz
+
+    剧本执行出现错误排查思路/步骤:
+	1) 找到剧本中出现问题关键点
+	2) 将剧本中的操作转换成模块进行操作
+	3) 将模块的功能操作转换成linux命令
+	   本地管理主机上执行命令测试
+	   远程被管理主机上执行命令测试
+
+    - name: 01-install rsync
+      yum:
+        name: ['rsync', 'tree', 'wget']  --- saltstack
+        state: installed
+
+	- name: xxx
+	  yum: name=xxx state=installed      --- ansible
+
+
+
+5、 在剧本中设置忽略错误
+    默认playbook会检查命令和模块的返回状态，如遇到错误就中断playbook的执行
+    可以加入ignore_errors: yes忽略错误
+    vim test06.yml
+    - hosts: all
+      remote_user: root
+      tasks:
+        - name: Ignore False
+          command: /bin/false
+    	  ignore_errors: yes
+        - name: touch new file
+    	  file: path=/tmp/oldboy_ignore state=touch
+
+6、 在剧本中设置标签功能
+    - hosts: oldboy
+      ignore_errors: yes
+      remote_user: root
+      tasks:
+        - name: Check File
+          file: path=/tmp/this_is_{{ ansible_hostname }}_file state=touch
+          when: (ansible_hostname == "nfs01") or (ansible_hostname == "backup")
+		  tags: t1
+
+        - name: bad thing
+          command: ech 123
+          #ignore_errors: yes
+		  tags: t2
+
+        - name: install httpd
+          yum: name=httpd state=installed
+          when: (ansible_all_ipv4_addresses == ["172.16.1.7","10.0.0.7"])
+		  tags: t3
+
+        - name: install httpd2
+          yum: name=httpd2 state=installed
+          when: (ansible_distribution == "ubuntu")
+		  tags: t4
+
+	指定执行哪个标签任务： ansible-playbook --tags=t2 test05.yml
+	跳过指定标签任务：     ansible-playbook --skip-tags=t2 test05.yml
+
+7、 在剧本中设置触发功能
+    - hosts: backup
+      remote_user: root
+      tasks:
+        - name: 01 Install rsync
+          yum: name=rsync state=present
+
+        - name: 02 push config file
+          copy: src=./file/{{ item.src }} dest=/etc/{{ item.dest }} mode={{ item.mode }}
+          with_items:
+            - { src: "rsyncd.conf", dest: "rsyncd.conf", mode: "0644" }
+            - { src: "rsync.password", dest: "rsync.password", mode: "0600" }
+          notify: restart rsync server
+
+      handlers:
+        - name: restart rsync server
+          service: name=rsyncd state=restarted
+
+8、 将多个剧本进行整合
+    方式一：include_tasks: f1.yml
+    - hosts: all
+      remote_user: root
+      tasks:
+        - include_tasks: f1.yml
+        - include_tasks: f2.yml
+
+    方式二：include: f1.yml
+    - include：f1.yml
+    - include：f2.yml
+
+	方式三：- import_playbook:
+	[root@m01 ansible-playbook]# cat main.yml
+    - import_playbook: base.yml
+    - import_playbook: rsync.yml
+    - import_playbook: nfs.yml
+	- import_playbook: oxxx.yml
+    - import_playbook: rsync.yml
+    - import_playbook: nfs.yml
+
+
+
+####### rsync 同步服务
+
+rsync_server.yaml
+
+    - hosts: rsync_server
+      tasks:
+        - name: 01-install rsync
+          yum: name=rsync state=installed
+        - name: 02-push conf file
+          copy: src=/etc/ansible/server_file/rsync_server/rsyncd.conf dest=/etc/
+        - name: 03-create user
+          user: name=rsync create_home=no shell=/sbin/nologin
+          #shell: useradd rsync -M -s /sbin/nologin
+        - name: 04-create backup dir
+          file: path=/backup state=directory owner=rsync group=rsync
+        - name: 05-create password file
+          copy: content=rsync_backup:oldboy123 dest=/etc/rsync.password mode=600
+        - name: 06-start rsync server
+          service: name=rsyncd state=started enabled=yes
+
+    - hosts: rsync_clients
+      tasks:
+        - name: 01-install rsync
+          yum: name=rsync state=installed
+        - name: 02-create password file
+          copy: content=oldboy123 dest=/etc/rsync.password mode=600
+        - name: 03-create test file
+          file: dest=/tmp/test.txt  state=touch
+        - name: 04-check test
+          shell: rsync -avz /tmp/test.txt rsync_backup@172.16.1.41::backup --password-file=/etc/rsync.password
+
+
+
+####### NFS 服务剧本
+
+1、创建几个目录
+        [root@m01 ansible-playbook]# tree nfs-file/
+        nfs-file/
+        ├── nfs-client
+        └── nfs-server
+
+2、编写剧本信息
+       主机清单:
+       [nfs:children]
+       nfs_server
+       nfs_client
+       [nfs_server]
+       172.16.1.31
+       [nfs_client]
+       172.16.1.7
+       #172.16.1.8
+       #172.16.1.9
+
+- hosts: nfs
+  tasks:
+    - name: 01-install nfs software
+      yum:
+        name: ['nfs-utils','rpcbind']
+        state: installed
+
+- hosts: nfs_server
+  #vars:
+  #  Data_dir: /data
+  tasks:
+    - name: 01-copy conf file
+      copy: src=/etc/ansible/ansible-playbook/nfs-file/nfs-server/exports dest=/etc
+      notify: restart nfs server
+    - name: 02-create data dir
+      file: path={{ Data_dir }} state=directory owner=nfsnobody group=nfsnobody
+       # path: ['data01','data02','data03']
+       # state: directory
+       # owner: nfsnobody
+       # group: nfsnobody
+    - name: 03-boot server
+      #service: name=rpcbind state=started enabled=yes
+      #service: name=nfs state=started enabled=yes
+      service: name={{ item }} state=started enabled=yes
+      with_items:
+        - rpcbind
+        - nfs
+
+  handlers:
+    - name: restart nfs server
+      service: name=nfs state=restarted
+
+- hosts: nfs_client
+  #vars:
+  #  Data_dir: /data
+  tasks:
+    - name: 01-mount
+      mount: src=172.16.1.31:{{ Data_dir }} path=/mnt fstype=nfs state=mounted
+    - name: 02-check mount info
+      shell: df -h|grep /data
+      register: mount_info
+    - name: display mount info
+      debug: msg={{ mount_info.stdout_lines }}
+   第三个历程: 进行剧本测试
+
+
+
+############### role 剧本
+
+ansible程序roles --- 规范
+
+    剧本编写完问题:
+        1. 目录结构不够规范
+        2. 编写好的任务如何重复调用
+        3. 服务端配置文件改动,客户端参数信息也自动变化
+        4. 汇总剧本中没有显示主机角色信息
+        5. 一个剧本内容信息过多,不容易进行阅读,如何进行拆分
+
+	第一个历程: 规范目录结构
+        cd /etc/ansible/roles
+        mkdir {rsync,nfs}   --- 创建相应角色目录
+        mkdir {nfs,rsync}/{vars,tasks,templates,handlers,files}  --- 创建角色目录下面的子目录
+        [root@m01 roles]# tree
+        .
+        ├── nfs
+        │   ├── files       --- 保存需要分发文件目录
+        │   ├── handlers	--- 保存触发器配置文件信息
+        │   ├── tasks       --- 保存要执行的动作信息文件   ok
+        │   ├── templates   --- 保存需要分发模板文件 模板文件中可以设置变量信息
+        │   └── vars        --- 保存变量信息文件
+        └── rsync
+            ├── files
+            ├── handlers
+            ├── tasks
+            ├── templates
+            └── vars
+
+    第二个历程: 在roles目录中创建相关文件
+        编写文件流程图:
+        1) 编写tasks目录中的main.yml文件
+        - name: 01-copy conf file
+          copy: src=exports dest=/etc
+          notify: restart nfs server
+        - name: 02-create data dir
+          file: path={{ Data_dir }} state=directory owner=nfsnobody group=nfsnobody
+          # path: ['data01','data02','data03']
+          # state: directory
+          # owner: nfsnobody
+          # group: nfsnobody
+        - name: 03-boot server
+          service: name={{ item }} state=started enabled=yes
+          with_items:
+            - rpcbind
+            - nfs
+
+        vim main.yml
+        - include_tasks: copy_info.yml
+        - include_tasks: create_dir.yml
+        - include_tasks: boot_server.yml
+
+        vim copy_info.yml
+        - name: 01-copy conf file
+          copy: src=exports dest=/etc
+          notify: restart nfs server
+
+        vim create_dir.yml
+        - name: 02-create data dir
+          file: path={{ Data_dir }} state=directory owner=nfsnobody group=nfsnobody
+
+        vim boot_server.yml
+        - name: 03-boot server
+          service: name={{ item }} state=started enabled=yes
+          with_items:
+            - rpcbind
+            - nfs
+
+        2) 编写vars目录中的main.yml文件
+        [root@m01 vars]# vim main.yml
+        Data_dir: /data
+
+        3) 编写files目录中的文件
+        [root@m01 files]# ll
+        total 4
+        -rw-r--r-- 1 root root 29 May 17 15:23 exports
+
+        4) 编写handlers目录中的main.yml文件
+        vim main.yml
+        - name: restart nfs server
+        service: name=nfs state=restarted
+
+        目录中文件编写好汇总结构
+        [root@m01 nfs]# tree
+        .
+        ├── files
+        │   └── exports
+        ├── handlers
+        │   └── main.yml
+        ├── tasks
+        │   └── main.yml
+        ├── templates
+        └── vars
+            └── main.yml
+
+    第三个历程: 编写一个主剧本文件
+        [root@m01 roles]# cat site.yml
+        - hosts: nfs_server
+          roles:
+            - nfs-server
+
+        - hosts: rsync_server
+          roles:
+            - rsync
+
+
+
+

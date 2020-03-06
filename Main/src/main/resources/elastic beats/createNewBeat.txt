@@ -1,0 +1,25 @@
+# 创建自定义的beat
+# 安装go 语言环境
+
+# 安装 pip
+yum -y install epel-release
+yum -y install python-pip
+
+# 安装 cookiecutter
+pip install cookiecutter
+
+# 安装git 环境 https://mirrors.edge.kernel.org/pub/software/scm/git/
+sudo yum install -y wget
+sudo yum install -y gcc-c++
+sudo yum install -y zlib-devel perl-ExtUtils-MakeMaker
+
+tar -zxvf git-2.25.0.tar.gz -C /usr/local/
+cd /usr/local/git-2.25.0
+./configure --prefix=/usr/local
+make
+sudo make install
+
+ln -s /usr/local/bin/git /usr/bin
+
+
+

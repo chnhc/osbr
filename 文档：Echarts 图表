@@ -1,0 +1,19 @@
+
+https://www.echartsjs.com/examples/zh/index.html
+
+介绍 ：
+
+    Echarts 是 web 项目模块，主要是通过 echartsjs 进行图表，在服务端的渲染
+    提高用户体验
+
+特别注意：
+
+    如果新建的 module 是 web 模块
+
+        注意：resource 里 ： templates 是动态页面
+                            static 是静态页面
+             如果 web 模块有接口，并且 使用@RequestMapping("/echarts")
+             那么需要注意： 接口跳转的 templates 的动态页面里，静态资源必须放在 static/echarts 这里！
+             例如： 使用@RequestMapping("/echarts")访问的页面，静态资源必须在 static/echarts
+             例如 Echarts 模块，详情自行查阅！
+
